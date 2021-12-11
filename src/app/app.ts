@@ -17,7 +17,8 @@ const defaultAppConfig: AppConfig = {
     xsoverlayVolume: "0.5",
     xsoverlayOpacity: "1.0",
     xsoverlayTimeout: "3.0",
-    verbose: false
+    verbose: false,
+    noUpdate: true
 }
 
 export interface AppContext {
@@ -32,6 +33,8 @@ export function app(param: AppParameterObject): void {
     const config = generateAppConfig(param);
     const interval = parseInt(config.interval, 10)
     const context = initContext(config);
+
+    // check update
 
     showInitNotification(config);
     setInterval(() => {

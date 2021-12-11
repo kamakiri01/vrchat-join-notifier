@@ -13,6 +13,7 @@
     xsoverlayOpacity?: string;
     xsoverlayTimeout?: string;
     verbose?: boolean;
+    noUpdate?: boolean;
 }
 
 /**
@@ -30,4 +31,5 @@ export interface AppConfig {
     xsoverlayOpacity: string;
     xsoverlayTimeout: string;
     verbose: boolean;
+    noUpdate: boolean;
 }

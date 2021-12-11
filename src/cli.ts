@@ -23,6 +23,7 @@ program
     .option("-xo, --xsoverlay-opacity <opacity>", "XSOverlay notification opacity (0~1)")
     .option("-xt, --xsoverlay-timeout <sec>", "XSOverlay notification disappear time (sec)")
     .option("-V, --verbose", "display full log details")
+    .option("-nu, --no-update", "no check update")
 
 export async function run(argv: any): Promise<void> {
     program.parse(argv);
@@ -42,6 +43,7 @@ export async function run(argv: any): Promise<void> {
         config.xsoverlayOpacity =  program["xsoverlayOpacity"];
         config.xsoverlayTimeout =  program["xsoverlayTimeout"];
         config.verbose =           program["verbose"];
+        config.noUpdate =          program["noUpdate"]
     }
 
     app(config);

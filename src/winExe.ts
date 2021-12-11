@@ -3,4 +3,5 @@ import { app } from "./app/app";
 import { readConfigFile } from "./app/util/util";
 
 const config = readConfigFile(path.resolve(__dirname, "..", "join-notifier.json"));
+if (process.argv.includes("--no-update")) config.noUpdate = true;
 app(config);
