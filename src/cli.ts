@@ -23,7 +23,8 @@ program
     .option("-xo, --xsoverlay-opacity <opacity>", "XSOverlay notification opacity (0~1)")
     .option("-xt, --xsoverlay-timeout <sec>", "XSOverlay notification disappear time (sec)")
     .option("-V, --verbose", "display full log details")
-    .option("-nu, --no-update", "no check update")
+    // .option("-nu, --no-update", "no update")
+    // .option("-nc, --no-check-update", "no check update")
 
 export async function run(argv: any): Promise<void> {
     program.parse(argv);
@@ -36,14 +37,15 @@ export async function run(argv: any): Promise<void> {
         config.notificationTypes = program["notificationTypes"];
         config.specificNames =     program["specificNames"];
         config.specificExec =      program["specificExec"];
-        config.generalExec =      program["generalExec"];
+        config.generalExec =       program["generalExec"];
         config.isToast =           program["toast"];
         config.isXSOverlay =       program["xsoverlay"];
         config.xsoverlayVolume =   program["xsoverlayVolume"];
         config.xsoverlayOpacity =  program["xsoverlayOpacity"];
         config.xsoverlayTimeout =  program["xsoverlayTimeout"];
         config.verbose =           program["verbose"];
-        config.noUpdate =          program["noUpdate"]
+        config.noUpdate =          true; // winExeStandalone起動時限定機能のためcliでは必ず無効化する
+        config.noCheckUpdate =     true;
     }
 
     app(config);
