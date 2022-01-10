@@ -1,3 +1,9 @@
+export type AppPlatformType = "cli" | "standalone" | "launcher";
+
+// updateの是非フラグ -> noUpdate
+// checkの是非フラグ -> checkUpdate
+
+
 /**
  * app が外部から受け取るパラメータ
  */
@@ -14,6 +20,7 @@
     xsoverlayTimeout?: string;
     verbose?: boolean;
     noUpdate?: boolean;
+    noCheckUpdate?: boolean;
 }
 
 /**
@@ -32,4 +39,5 @@ export interface AppConfig {
     xsoverlayTimeout: string;
     verbose: boolean;
     noUpdate: boolean;
+    noCheckUpdate: boolean;
 }

@@ -1,4 +1,6 @@
 import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 import { parse } from "jsonc-parser";
 import { AppParameterObject } from "../types/AppConfig";
 
@@ -17,4 +19,19 @@ export function readConfigFile(configFilePath: string): AppParameterObject {
     } catch (error) {
         return {};
     }
+}
+
+export function initTmpDir(): string {
+    const appTmpPath = path.join(os.tmpdir(), "VRChatJoinNotifier", "notifier");
+    try {
+        // fs.rmSync(appTmpPath, { recursive: true, force: true }); // over node14
+        fs.rmdirSync(appTmpPath, { recursive: true });
+        fs.mkdirSync(appTmpPath, { recursive: true });
+    } catch (_) {
+        console.log("initTmpDir err", _);
+    }
+    const currentAppTmpPath = path.join(appTmpPath, (Date.now()).toString());
+    console.log("currentAppTmpPath", currentAppTmpPath);
+    fs.mkdirSync(currentAppTmpPath, { recursive: true });
+    return currentAppTmpPath;
 }
