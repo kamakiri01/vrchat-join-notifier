@@ -60,5 +60,11 @@
      * XSOverlay通知が表示されてから閉じるまでの時間を指定します。（秒）
      * Specifies the amount of time between when the XSOverlay notification is displayed and when it is closed. (seconds)
      */
-    "xsoverlayTimeout": "3.0"
+    "xsoverlayTimeout": "3.0",
+
+    /**
+     * アプリの自動更新を無効にします。 (true or false)
+     * Disable auto-update. (true or false)
+     */
+     "noUpdate": false
 }
