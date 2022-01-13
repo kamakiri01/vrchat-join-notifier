@@ -1,9 +1,7 @@
 import fetch, { RequestInit } from "node-fetch";
 import * as path from "path";
 import * as fs from "fs";
-import * as child_process from "child_process";
 import * as unzipper from "unzipper";
-import { resolve } from "path";
 
 export async function canUpdate(): Promise<boolean> {
     try {
@@ -14,14 +12,14 @@ export async function canUpdate(): Promise<boolean> {
         const fetchOptions: RequestInit = {
             headers: {
                 "User-Agent": "VRChatJoinNotifier-Updater:v" + currentVersion
-            } 
+            }
         };
         const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.json", fetchOptions);
         if (!response.ok) return false;
         const latestJson: LatestJson = await response.json();
         console.log("web latestJson", latestJson, currentVersion < latestJson.version);
         return currentVersion < latestJson.version;
-    } catch(error: any) {
+    } catch (error: any) {
         handleProtocolError(error);
         return false;
     }
@@ -44,7 +42,7 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
         });
 
         return true;
-    } catch(error: any) {
+    } catch (error: any) {
         handleProtocolError(error);
         return false;
     }
@@ -73,7 +71,7 @@ export async function replaceApp(tmpDirPath: string) {
                 const newFileDestPath = path.join(currentAppDir, fileName);
                 try {
                     fs.renameSync(newFileDestPath, newFileDestPath + ".old");
-                } catch(error: any) {
+                } catch (error: any) {
                     handleProtocolError(error);
                     // file no conflict
                 }
@@ -92,32 +90,11 @@ export async function replaceApp(tmpDirPath: string) {
         ));
 
         console.log("copy done");
-    } catch(error: any) {
+    } catch (error: any) {
         handleProtocolError(error);
         return false;
     }
     return true;
-}
-
-export function launchUpdatedApp(callback: () => void) {
-    var updatedExePath = path.join(__dirname, "../../../", "vrchat-join-notifier.exe");
-    console.log("updatedExePath...", updatedExePath);
-
-    var newCmd = child_process.exec("start cmd.exe /K " + updatedExePath);
-    newCmd.unref();
-    console.log("launchUpdatedApp...done");
-
-    while(!newCmd.pid) {
-        console.log("pid no found", newCmd.pid);
-    }
-    console.log("pid found", newCmd.pid);
-    // NOTE: execがcmd.exeを立ち上げるには若干の時間差があり、これより早くcallbackからprocess.exit()を実行した場合、
-    // 新しいcmd.exeが立ち上がらないままこのプロセスが終了してしまう。
-    // execのPIDは即座に払い出されるがcmdの起動完了を知る手立てが無いため、0.5秒の猶予を待ってからcallbackを呼ぶ。
-    setTimeout(() => {
-        callback();
-    }, 500);
-
 }
 
 async function extractZip(zipFilePath: string, destDirPath: string): Promise<void> {

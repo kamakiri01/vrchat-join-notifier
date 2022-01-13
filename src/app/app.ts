@@ -7,6 +7,7 @@ import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
 import { initTmpDir } from "./util/util";
 import * as appUpdater from "./util/appUpdater";
+import { launchUpdatedApp } from "./util/launchNewProcess";
 
 const defaultAppConfig: AppConfig = {
     interval: "2",
@@ -34,20 +35,19 @@ export interface AppContext {
 
 export function app(param: AppParameterObject): void {
     console.log("param", param);
-
     wipeOldFiles();
 
-    if (param.noUpdate) return (() => {
-        appUpdater.canUpdate().then(() => _app(param));
-    })();
-
-    updateApp().then((updated) => {
-        console.log("updated", updated);
-        if (!updated) return _app(param);
-        appUpdater.launchUpdatedApp(() => {
-            exitApp();
+    if (param.noCheckUpdate) {
+        _app(param);
+    } else if (param.noUpdate) {
+        checkUpdate().then(_ => _app(param));
+    } else {
+        updateApp().then((updated) => {
+            console.log("updated", updated);
+            if (!updated) return _app(param);
+            launchUpdatedApp(() => exitApp());
         });
-    });
+    }
 }
 
 function _app(param: AppParameterObject) {
@@ -59,6 +59,12 @@ function _app(param: AppParameterObject) {
     setInterval(() => {
         loop(context);
     }, interval * 1000);
+}
+
+async function checkUpdate(): Promise<boolean> {
+    const canUpdate = await appUpdater.canUpdate();
+    console.log("canUpdate", canUpdate);
+    return canUpdate;
 }
 
 async function updateApp(): Promise<boolean> {
@@ -74,7 +80,7 @@ async function updateApp(): Promise<boolean> {
 
     const successReplace = await appUpdater.replaceApp(tmpDirPath);
     console.log("successReplace", successReplace);
-    if (!successReplace) console.log("Update failed. If app malfunctioned, re-download latest app.");
+    if (!successReplace) console.log("Update failed. If this app breaks, re-download latest app.");
     return successReplace;
 }
 
@@ -83,22 +89,24 @@ function exitApp() {
 }
 
 function wipeOldFiles() {
-    const currentAppDir = path.join(__dirname, "../../../");
+    const currentAppDir = path.dirname(process.execPath);
     const files = fs.readdirSync(currentAppDir);
-    console.log("wipeOldFiles __dirname: " + __dirname, "currentAppDir: " + currentAppDir);
-
-    console.log(fs.readdirSync(path.join(__dirname, "../../../../")), path.join(__dirname, "../../../../"))
-    console.log(fs.readdirSync(path.join(__dirname, "../../../")), path.join(__dirname, "../../../"))
-    console.log(fs.readdirSync(path.join(__dirname, "../../")), path.join(__dirname, "../../"))
-    console.log(fs.readdirSync(path.join(__dirname, "../")), path.join(__dirname, "../"))
-    console.log(fs.readdirSync(path.join(__dirname, "./")), path.join(__dirname, "./"))
-
-    console.log("files", files);
+    console.log("files", files, currentAppDir);
     files.forEach(file => {
         const ext = path.extname(file);
+        if (ext === ".old") fs.unlinkSync(file);
     })
 
-
+    // NOTE: nexe環境ではfsモジュールが仮想化されているため、fs.readdirSync()を使用してexecPathディレクトリのファイル一覧を取得することがきでない
+    // vrchat-join-notifier.exeはアップデートの内容に関わらず常にあるため、暗黙の仮定として固定パスでチェックする
+    // TODO: nexe/pkg/その他の実行ファイルの仮想fsからreaddirSyncできる方法を検討する
+    const oldExecPath = path.join(currentAppDir, "vrchat-join-notifier.exe.old");
+    console.log("vrchat-join-notifier.exe.old check",oldExecPath,  fs.existsSync(oldExecPath));
+    try {
+        fs.unlinkSync(oldExecPath);
+    } catch (error: any) {
+        // アップデートによって再起動された場合のみ.oldファイルが存在するため、通常時はこのパスに到達する
+    }
 }
 
 function initContext(config: AppConfig): AppContext {

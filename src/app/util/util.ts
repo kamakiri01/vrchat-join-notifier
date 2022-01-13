@@ -17,6 +17,7 @@ export function readConfigFile(configFilePath: string): AppParameterObject {
         const config: AppParameterObject = parse(fs.readFileSync(configFilePath, "utf8"));
         return config;
     } catch (error) {
+        console.log("readConfigFile error", error);
         return {};
     }
 }
