@@ -12,7 +12,8 @@ export async function canUpdate(): Promise<boolean> {
         const fetchOptions: RequestInit = {
             headers: {
                 "User-Agent": "VRChatJoinNotifier-Updater:v" + currentVersion
-            }
+            },
+            timeout: 3000
         };
         const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.json", fetchOptions);
         if (!response.ok) return false;
