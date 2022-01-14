@@ -12,9 +12,9 @@ import { launchUpdatedApp } from "./util/launchNewProcess";
 const defaultAppConfig: AppConfig = {
     interval: "2",
     notificationTypes: ["join"],
-    specificNames: null!,
-    specificExec: null!,
-    generalExec: null!,
+    specificNames: [],
+    specificExec: undefined,
+    generalExec: undefined,
     isToast: true,
     isXSOverlay: true,
     xsoverlayVolume: "0.5",
