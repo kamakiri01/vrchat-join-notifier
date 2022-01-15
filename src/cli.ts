@@ -44,7 +44,8 @@ export async function run(argv: any): Promise<void> {
         config.xsoverlayOpacity =  program["xsoverlayOpacity"];
         config.xsoverlayTimeout =  program["xsoverlayTimeout"];
         config.verbose =           program["verbose"];
-        config.noUpdate =          true; // winExeStandalone起動時限定機能のためcliでは必ず無効化する
+        // winExeStandalone起動時限定機能のためcliでは必ず無効化する
+        config.noUpdate =          true;
         config.noCheckUpdate =     true;
     }
 

@@ -30,8 +30,8 @@ export interface AppConfig {
     interval: string;
     notificationTypes: string[];
     specificNames: string[];
-    specificExec: string;
-    generalExec: string;
+    specificExec?: string;
+    generalExec?: string;
     isToast: boolean;
     isXSOverlay: boolean;
     xsoverlayVolume: string;

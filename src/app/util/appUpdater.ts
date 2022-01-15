@@ -32,13 +32,14 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
         fs.mkdirSync(downloadDirPath, { recursive: true });
         const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.zip");
         console.log("downloadLatest, response.ok: " + response.ok, "response");
-        if (!response.ok) return false;
+        if (!response || !response.ok) return false;
+
         const savePath = path.join(downloadDirPath, "latest.zip");
         const writeStream = fs.createWriteStream(savePath);
 
         await new Promise<boolean>((resolve, reject) => {
             response.body.pipe(writeStream);
-            response.body.on("error", (err) => {throw err;});
+            response.body.on("error", (err) => reject(err));
             writeStream.on("finish", () => resolve(true));
         });
 
