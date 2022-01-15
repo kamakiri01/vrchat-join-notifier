@@ -63,8 +63,14 @@
     "xsoverlayTimeout": "3.0",
 
     /**
-     * アプリの自動更新を無効にします。 (true or false)
-     * Disable auto-update. (true or false)
+     * 【無料版のみ】アプリケーションの自動更新を無効にします。 (true or false)
+     * [free version only] Disable auto-update. (true or false)
      */
-     "noUpdate": false
+     "noUpdate": false,
+
+    /**
+     * 【無料版のみ】アプリケーションの更新チェックを無効にします。 (true or false)
+     * [free version only] Disable update check. (true or false)
+     */
+     "noCheckUpdate": false
 }
