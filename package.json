@@ -9,7 +9,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && npm run concat:latest",
     "concat:latest": "concat scripts/conf/platforms/node/prefix.js text/app/latest.json scripts/conf/platforms/node/suffix.js -o lib/app/latestJson/latestJson.js",
-    "cp:latest": "cpx --clean ./typings/latestJson.d.ts lib/latsetJson/",
     "lint": "eslint \"./src/**/*.ts\"",
     "deploy": "npm run deploy:win-standalone && npm run deploy:win-for-launcher",
     "deploy:win-standalone": "npm run deploy:win-standalone:text && npm run deploy:win-standalone:exe && npm run deploy:win-standalone:zip",
