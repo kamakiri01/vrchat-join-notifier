@@ -74,7 +74,6 @@ export async function replaceApp(tmpDirPath: string): Promise<boolean> {
                 }
                 return new Promise((resolve, reject) => {
                     const newFileSourcePath = path.join(extractDirPath, fileName);
-                    // fs.copyFileSync(newFileSourcePath, newFileDestPath);
                     // NOTE: fs.copyFileSyncの場合、full copy完了前に関数が終了することがあるためcallbackを使う
                     fs.copyFile(newFileSourcePath, newFileDestPath, (err) => {
                         if (err) reject(err);
