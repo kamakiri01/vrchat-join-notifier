@@ -2,7 +2,6 @@
   "name": "vrchat-join-notifier",
   "version": "0.3.0",
   "description": "Notify when someone joins the same instance",
-  "main": "index.js",
   "engines": {
     "node": ">=12.x"
   },
@@ -17,7 +16,8 @@
     "deploy:win-standalone:zip": "powershell compress-archive vrchat-join-notifier/ vrchat-join-notifier.zip -Force",
     "deploy:win-for-launcher": "npm run deploy:win-for-launcher:exe",
     "deploy:win-for-launcher:exe": "nexe lib/winExeLauncher.js --target 12.18.2 -o vrchat-join-notifier-for-launcher/vrchat-join-notifier.exe",
-    "release:web-update": "npm run deploy:web-update:json && npm run deploy:web-update:zip",
+    "release": "npm run release:web-update",
+    "release:web-update": "npm run release:web-update:json && npm run release:web-update:zip",
     "release:web-update:json": "cpx text/app/latest.json public/",
     "release:web-update:zip": "powershell compress-archive vrchat-join-notifier/vrchat-join-notifier.exe public/latest.zip -Force"
   },
