@@ -98,7 +98,7 @@ function wipeOldFiles() {
     try {
         fs.unlinkSync(oldExecPath);
     } catch (error: any) {
-        // アップデートによって再起動された場合のみ.oldファイルが存在するため、通常時はこのパスに到達する
+        // アップデートによって再起動された場合のみ.oldファイルが存在するため、正常系でもこのパスに到達する
     }
 }
 
