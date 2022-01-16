@@ -10,6 +10,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "files": [
+    "./typings/latestJson.d.ts",
     "./typings/powertoast.d.ts"
   ],
   "include": [

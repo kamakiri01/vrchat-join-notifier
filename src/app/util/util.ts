@@ -1,4 +1,6 @@
 import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 import { parse } from "jsonc-parser";
 import { AppParameterObject } from "../types/AppConfig";
 
@@ -17,4 +19,19 @@ export function readConfigFile(configFilePath: string): AppParameterObject {
     } catch (error) {
         return {};
     }
+}
+
+export function initTmpDir(): string {
+    const appTmpPath = path.join(os.tmpdir(), "VRChatJoinNotifier", "notifier");
+    try {
+        // fs.rmSync(appTmpPath, { recursive: true, force: true }); // over node14
+        fs.rmdirSync(appTmpPath, { recursive: true });
+        fs.mkdirSync(appTmpPath, { recursive: true });
+    } catch (_) {
+        // NOTE: 他の VRChatJoinNotifier が起動しているなどの理由で一時フォルダを削除できない場合がある
+        // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
+    }
+    const currentAppTmpPath = path.join(appTmpPath, (Date.now()).toString());
+    fs.mkdirSync(currentAppTmpPath, { recursive: true });
+    return currentAppTmpPath;
 }

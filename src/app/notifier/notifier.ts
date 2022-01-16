@@ -23,7 +23,9 @@ export function showNotification(label: string, userNames: string[], isSpecific:
 export function showInitNotification(config: AppConfig): void {
     const message = "running";
     const title = "VRChat Join Notifier";
-    console.log("notifier running", config.specificNames ? "specificNames: " + config.specificNames.join(" ") : "");
+    console.log("notifier running");
+    if (config.notificationTypes.length > 0) console.log(`notificationTypes: ${config.notificationTypes.join(" ")}`);
+    if (config.specificNames.length > 0) console.log(`specificNames: ${config.specificNames.join(" ")}`);
 
     if (config.isToast)
         showToast(message, title);

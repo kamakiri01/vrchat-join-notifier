@@ -13,6 +13,8 @@
     xsoverlayOpacity?: string;
     xsoverlayTimeout?: string;
     verbose?: boolean;
+    noUpdate?: boolean;
+    noCheckUpdate?: boolean;
 }
 
 /**
@@ -22,12 +24,14 @@ export interface AppConfig {
     interval: string;
     notificationTypes: string[];
     specificNames: string[];
-    specificExec: string;
-    generalExec: string;
+    specificExec?: string;
+    generalExec?: string;
     isToast: boolean;
     isXSOverlay: boolean;
     xsoverlayVolume: string;
     xsoverlayOpacity: string;
     xsoverlayTimeout: string;
     verbose: boolean;
+    noUpdate: boolean;
+    noCheckUpdate: boolean;
 }

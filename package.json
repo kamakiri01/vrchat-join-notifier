@@ -1,15 +1,25 @@
 {
   "name": "vrchat-join-notifier",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Notify when someone joins the same instance",
   "main": "index.js",
+  "engines": {
+    "node": ">=12.x"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && npm run concat:latest",
+    "concat:latest": "concat scripts/conf/platforms/node/prefix.js text/app/latest.json scripts/conf/platforms/node/suffix.js -o lib/app/latestJson/latestJson.js",
     "lint": "eslint \"./src/**/*.ts\"",
-    "deploy:win": "npm run deploy:win:text && npm run deploy:win:exe && npm run deploy:win:zip",
-    "deploy:win:text": "cpx --clean ./text/** ./vrchat-join-notifier/",
-    "deploy:win:exe": "nexe lib/winExe.js --target 12.18.2 -o vrchat-join-notifier/vrchat-join-notifier.exe",
-    "deploy:win:zip": "powershell compress-archive vrchat-join-notifier/ vrchat-join-notifier.zip -Force"
+    "deploy": "npm run deploy:win-standalone && npm run deploy:win-for-launcher",
+    "deploy:win-standalone": "npm run deploy:win-standalone:text && npm run deploy:win-standalone:exe && npm run deploy:win-standalone:zip",
+    "deploy:win-standalone:text": "cpx --clean ./text/doc/** ./vrchat-join-notifier/",
+    "deploy:win-standalone:exe": "nexe lib/winExeStandalone.js --target 12.18.2 -o vrchat-join-notifier/vrchat-join-notifier.exe",
+    "deploy:win-standalone:zip": "powershell compress-archive vrchat-join-notifier/ vrchat-join-notifier.zip -Force",
+    "deploy:win-for-launcher": "npm run deploy:win-for-launcher:exe",
+    "deploy:win-for-launcher:exe": "nexe lib/winExeLauncher.js --target 12.18.2 -o vrchat-join-notifier-for-launcher/vrchat-join-notifier.exe",
+    "release:web-update": "npm run deploy:web-update:json && npm run deploy:web-update:zip",
+    "release:web-update:json": "cpx text/app/latest.json public/",
+    "release:web-update:zip": "powershell compress-archive vrchat-join-notifier/vrchat-join-notifier.exe public/latest.zip -Force"
   },
   "bin": {
     "vn": "bin/run"
@@ -20,17 +30,23 @@
   "author": "kamakiri01",
   "license": "MIT",
   "dependencies": {
-    "vrchat-activity-viewer": "^5.1.0",
     "commander": "^6.2.0",
     "jsonc-parser": "^3.0.0",
-    "powertoast": "^1.2.3"
+    "node-fetch": "^2.6.6",
+    "powertoast": "^1.2.3",
+    "unzipper": "^0.10.11",
+    "vrchat-activity-viewer": "^5.1.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.43",
+    "@types/node-fetch": "^2.5.12",
+    "@types/unzipper": "^0.10.5",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
+    "concat": "^1.0.3",
     "cpx": "^1.5.0",
     "eslint": "^7.25.0",
+    "mkdirp": "^1.0.4",
     "nexe": "^3.3.7",
     "typescript": "^4.2.3"
   }

@@ -7,7 +7,7 @@ export function comsumeNewJoin(context: AppContext): void {
 
     if (context.config.generalExec) exec(context.config.generalExec, context.newJoinUserNames);
 
-    const isSpecific = isIncludeSpecificNames(context.newJoinUserNames, context.config.specificNames || []);
+    const isSpecific = isIncludeSpecificNames(context.newJoinUserNames, context.config.specificNames);
     if (isSpecific && context.config.specificExec) {
         exec(context.config.specificExec, context.newJoinUserNames);
     }
@@ -32,6 +32,10 @@ function isIncludeSpecificNames(names: string[], specificNames: string[]): boole
 }
 
 function exec(execCommand: string, userNames: string[]) {
-    const stdout = execSync(execCommand.replace("%{{names}}", userNames.join(" ")));
-    console.log(stdout.toString());
+    try {
+        const stdout = execSync(execCommand.replace("%{{names}}", userNames.join(" ")));
+        console.log(stdout.toString());
+    } catch (error) {
+        console.log(error);
+    }
 }
