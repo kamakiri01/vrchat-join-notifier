@@ -7,6 +7,7 @@ import * as unzipper from "unzipper";
 
 export async function canUpdate(): Promise<boolean> {
     try {
+        /* eslint-disable @typescript-eslint/no-var-requires */
         const latest = require("../latestJson/latestJson").latestJson as LatestJson;
         const currentVersion = latest.version;
 
@@ -49,7 +50,7 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
     }
 }
 
-export async function replaceApp(tmpDirPath: string) {
+export async function replaceApp(tmpDirPath: string): Promise<boolean> {
     const downloadDirPath = path.join(tmpDirPath, "download");
     const extractDirPath = path.join(tmpDirPath, "extract");
 
@@ -82,7 +83,6 @@ export async function replaceApp(tmpDirPath: string) {
                 })
             }
         ));
-
     } catch (error: any) {
         handleProtocolError(error);
         return false;
@@ -91,7 +91,7 @@ export async function replaceApp(tmpDirPath: string) {
 }
 
 async function extractZip(zipFilePath: string, destDirPath: string): Promise<void> {
-    var readStream = fs.createReadStream(zipFilePath);
+    const readStream = fs.createReadStream(zipFilePath);
     return await new Promise((resolve, reject) => {
         readStream.pipe(unzipper.Extract({ path: destDirPath }));
         readStream.on("error", (err) => {
