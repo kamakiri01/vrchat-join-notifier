@@ -3,12 +3,13 @@ import * as path from "path";
 import * as fs from "fs";
 import * as unzipper from "unzipper";
 
+// NOTE: アプリケーションアップデート機能は winExeStandalone 向け機能であり、他の起動元から呼び出してはならない
+
 export async function canUpdate(): Promise<boolean> {
     try {
         const latest = require("../latestJson/latestJson").latestJson as LatestJson;
         const currentVersion = latest.version;
-        console.log("latset: ", latest);
-    
+
         const fetchOptions: RequestInit = {
             headers: {
                 "User-Agent": "VRChatJoinNotifier-Updater:v" + currentVersion
@@ -18,7 +19,6 @@ export async function canUpdate(): Promise<boolean> {
         const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.json", fetchOptions);
         if (!response.ok) return false;
         const latestJson: LatestJson = await response.json();
-        console.log("web latestJson", latestJson, currentVersion < latestJson.version);
         return currentVersion < latestJson.version;
     } catch (error: any) {
         handleProtocolError(error);
@@ -31,7 +31,6 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
         const downloadDirPath = path.join(tmpDirPath, "download");
         fs.mkdirSync(downloadDirPath, { recursive: true });
         const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.zip");
-        console.log("downloadLatest, response.ok: " + response.ok, "response");
         if (!response || !response.ok) return false;
 
         const savePath = path.join(downloadDirPath, "latest.zip");
@@ -51,7 +50,6 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
 }
 
 export async function replaceApp(tmpDirPath: string) {
-    console.log("replaceApp");
     const downloadDirPath = path.join(tmpDirPath, "download");
     const extractDirPath = path.join(tmpDirPath, "extract");
 
@@ -63,10 +61,7 @@ export async function replaceApp(tmpDirPath: string) {
         );
 
         const extractFiles = fs.readdirSync(extractDirPath);
-        const currentAppDir = path.join(__dirname, "../../../");
-        console.log("appUpdater __dirname", __dirname);
-        console.log("extractFiles", extractFiles, currentAppDir);
-    
+        const currentAppDir = path.join(__dirname, "../../../"); // ./lib/app/util/appUpdater.js から ./ への相対パス
         await Promise.all(
             extractFiles.map(async (filePath): Promise<void> => {
                 const fileName = path.basename(filePath);
@@ -80,18 +75,15 @@ export async function replaceApp(tmpDirPath: string) {
                 return new Promise((resolve, reject) => {
                     const newFileSourcePath = path.join(extractDirPath, fileName);
                     // fs.copyFileSync(newFileSourcePath, newFileDestPath);
-                    console.log("newFile", newFileSourcePath, newFileDestPath);
                     // NOTE: fs.copyFileSyncの場合、full copy完了前に関数が終了することがあるためcallbackを使う
                     fs.copyFile(newFileSourcePath, newFileDestPath, (err) => {
                         if (err) reject(err);
-                        console.log("copyFile callback done", newFileSourcePath);
                         resolve();
                     });
                 })
             }
         ));
 
-        console.log("copy done");
     } catch (error: any) {
         handleProtocolError(error);
         return false;
@@ -100,17 +92,13 @@ export async function replaceApp(tmpDirPath: string) {
 }
 
 async function extractZip(zipFilePath: string, destDirPath: string): Promise<void> {
-    console.log("extractZip");
     var readStream = fs.createReadStream(zipFilePath);
     return await new Promise((resolve, reject) => {
         readStream.pipe(unzipper.Extract({ path: destDirPath }));
-        console.log("extract");
         readStream.on("error", (err) => {
-            console.log("extractZip reject");
             reject(err);
         })
         readStream.on("end", () => {
-            console.log("extractZip resolve");
             resolve();
         })        
     })

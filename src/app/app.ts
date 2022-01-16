@@ -34,7 +34,6 @@ export interface AppContext {
 }
 
 export function app(param: AppParameterObject): void {
-    console.log("param", param);
     wipeOldFiles();
 
     if (param.noCheckUpdate) {
@@ -43,7 +42,6 @@ export function app(param: AppParameterObject): void {
         checkUpdate().then(_ => _app(param));
     } else {
         updateApp().then((updated) => {
-            console.log("updated", updated);
             if (!updated) return _app(param);
             launchUpdatedApp(() => exitApp());
         });
@@ -52,7 +50,6 @@ export function app(param: AppParameterObject): void {
 
 function _app(param: AppParameterObject) {
     const config = generateAppConfig(param);
-    console.log("config", config);
     const interval = parseInt(config.interval, 10)
     const context = initContext(config);
     showInitNotification(config);
@@ -63,23 +60,21 @@ function _app(param: AppParameterObject) {
 
 async function checkUpdate(): Promise<boolean> {
     const canUpdate = await appUpdater.canUpdate();
-    console.log("canUpdate", canUpdate);
     return canUpdate;
 }
 
 async function updateApp(): Promise<boolean> {
     const canUpdate = await appUpdater.canUpdate();
-    console.log("canUpdate", canUpdate);
+    if (canUpdate) console.log("New update found.");
     if (!canUpdate) return false;
 
     const tmpDirPath = initTmpDir();
-    console.log("tmpDirPath", tmpDirPath);
     const successDownload = await appUpdater.downloadLatest(tmpDirPath);
-    console.log("successDownload", successDownload);
+    if (successDownload) console.log("Successful update download.");
     if (!successDownload) return false;
 
     const successReplace = await appUpdater.replaceApp(tmpDirPath);
-    console.log("successReplace", successReplace);
+    if (successReplace) console.log("Successful update. restarting.");
     if (!successReplace) console.log("Update failed. If this app breaks, re-download latest app.");
     return successReplace;
 }
@@ -91,17 +86,15 @@ function exitApp() {
 function wipeOldFiles() {
     const currentAppDir = path.dirname(process.execPath);
     const files = fs.readdirSync(currentAppDir);
-    console.log("files", files, currentAppDir);
     files.forEach(file => {
         const ext = path.extname(file);
         if (ext === ".old") fs.unlinkSync(file);
     })
 
-    // NOTE: nexe環境ではfsモジュールが仮想化されているため、fs.readdirSync()を使用してexecPathディレクトリのファイル一覧を取得することがきでない
-    // vrchat-join-notifier.exeはアップデートの内容に関わらず常にあるため、暗黙の仮定として固定パスでチェックする
+    // NOTE: nexe環境ではfsモジュールが仮想化されているため、fs.readdirSync()を使用してexecPathディレクトリのファイル一覧を取得することができない
+    // vrchat-join-notifier.exeはアップデートの内容に関わらず常に存在するため、特別扱いして常にチェックする
     // TODO: nexe/pkg/その他の実行ファイルの仮想fsからreaddirSyncできる方法を検討する
     const oldExecPath = path.join(currentAppDir, "vrchat-join-notifier.exe.old");
-    console.log("vrchat-join-notifier.exe.old check",oldExecPath,  fs.existsSync(oldExecPath));
     try {
         fs.unlinkSync(oldExecPath);
     } catch (error: any) {

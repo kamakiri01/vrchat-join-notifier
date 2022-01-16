@@ -29,10 +29,10 @@ export function initTmpDir(): string {
         fs.rmdirSync(appTmpPath, { recursive: true });
         fs.mkdirSync(appTmpPath, { recursive: true });
     } catch (_) {
-        console.log("initTmpDir err", _);
+        // NOTE: 他の VRChatJoinNotifier が起動しているなどの理由で一時フォルダを削除できない場合がある
+        // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
     }
     const currentAppTmpPath = path.join(appTmpPath, (Date.now()).toString());
-    console.log("currentAppTmpPath", currentAppTmpPath);
     fs.mkdirSync(currentAppTmpPath, { recursive: true });
     return currentAppTmpPath;
 }
