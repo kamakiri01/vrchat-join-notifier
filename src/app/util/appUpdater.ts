@@ -69,8 +69,7 @@ export async function replaceApp(tmpDirPath: string) {
                 try {
                     fs.renameSync(newFileDestPath, newFileDestPath + ".old");
                 } catch (error: any) {
-                    handleProtocolError(error);
-                    // file no conflict
+                    // 新しいファイルの場合は旧ファイルがないため、正常系でrenameSyncに失敗する
                 }
                 return new Promise((resolve, reject) => {
                     const newFileSourcePath = path.join(extractDirPath, fileName);
@@ -105,6 +104,5 @@ async function extractZip(zipFilePath: string, destDirPath: string): Promise<voi
 }
 
 function handleProtocolError(error: Error) {
-    // TODO: logging
-    console.log("handleProtocolError", error);
+    console.log("handleProtocolError", error); // ログ出力のみ
 }
