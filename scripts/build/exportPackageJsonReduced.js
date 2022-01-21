@@ -10,4 +10,4 @@ var packageJsonReduced = ${JSON.stringify({ version: version })}
 exports.packageJsonReduced = packageJsonReduced;
 `;
 fs.mkdirSync(path.resolve(__dirname, "../../lib/app/packageJsonReduced"), { recursive: true });
-fs.writeFileSync(path.resolve(__dirname, "../../lib/app/packageJsonReduced", "packageJsonReduced.js"), data, {encoding: "utf8"});
+fs.writeFileSync(path.resolve(__dirname, "../../lib/app/packageJsonReduced", "packageJsonReduced.js"), data, { encoding: "utf8" });
