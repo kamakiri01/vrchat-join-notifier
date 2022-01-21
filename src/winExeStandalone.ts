@@ -2,7 +2,7 @@ import * as path from "path";
 import { app } from "./app/app";
 import { readConfigFile } from "./app/util/util";
 
-
+/* eslint-disable @typescript-eslint/no-var-requires */
 const packageJson = require("./app/packageJsonReduced/packageJsonReduced").packageJsonReduced as PackageJsonReduced;
 console.log("notifier running.");
 console.log(`version: ${packageJson.version}`);
