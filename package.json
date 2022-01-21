@@ -6,8 +6,9 @@
     "node": ">=12.x"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && npm run concat:latest",
+    "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && npm run concat:latest && npm run concat:package-json",
     "concat:latest": "concat scripts/conf/platforms/node/prefix.js text/app/latest.json scripts/conf/platforms/node/suffix.js -o lib/app/latestJson/latestJson.js",
+    "concat:package-json": "node scripts/build/exportPackageJsonReduced.js",
     "lint": "eslint \"./src/**/*.ts\"",
     "deploy": "npm run deploy:win-standalone && npm run deploy:win-for-launcher",
     "deploy:win-standalone": "npm run deploy:win-standalone:text && npm run deploy:win-standalone:exe && npm run deploy:win-standalone:zip",
