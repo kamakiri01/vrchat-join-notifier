@@ -11,6 +11,7 @@
   },
   "files": [
     "./typings/latestJson.d.ts",
+    "./typings/packageJsonReduced.d.ts",
     "./typings/powertoast.d.ts"
   ],
   "include": [
