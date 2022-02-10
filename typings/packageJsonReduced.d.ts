@@ -1,5 +1,5 @@
 /**
- * package.json の一部を exe に埋め込むためのサブセット
+ * package.json ファイルの内容を一部のみ nexe ビルドに含めるためのサブセット
  */
 interface PackageJsonReduced {
     version: string;
