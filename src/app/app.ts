@@ -142,7 +142,6 @@ function loop(context: AppContext): void {
         if (!context.config.verbose) return;
         console.log("ERR", error);
     }
-
 }
 
 function getLatestLog(): ActivityLog[] | null {
