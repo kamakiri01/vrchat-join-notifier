@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { AppContext } from "./app";
 import { showNotification } from "./notifier/notifier";
+import { sendJoinOsc } from "./osc/sender";
 
 export function comsumeNewJoin(context: AppContext): void {
     if (context.newJoinUserNames.length === 0) return;
@@ -12,6 +13,8 @@ export function comsumeNewJoin(context: AppContext): void {
         exec(context.config.specificExec, context.newJoinUserNames);
     }
     showNotification("join", context.newJoinUserNames, isSpecific, context.config);
+    if (context.config.osc) sendJoinOsc(context.config.osc);
+
     context.newJoinUserNames = [];
 }
 
