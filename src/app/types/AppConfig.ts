@@ -15,6 +15,7 @@
     verbose?: boolean;
     noUpdate?: boolean;
     noCheckUpdate?: boolean;
+    osc?: OscConfig;
 }
 
 /**
@@ -34,4 +35,11 @@ export interface AppConfig {
     verbose: boolean;
     noUpdate: boolean;
     noCheckUpdate: boolean;
+    osc?: OscConfig;
+}
+
+export interface OscConfig {
+    sendPort: number;
+    generalSendAddress?: string;
+    specificSendAddress?: string;   
 }
