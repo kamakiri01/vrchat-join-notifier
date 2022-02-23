@@ -1,6 +1,15 @@
 import * as osc from "node-osc";
 import { OscConfig } from "../types/AppConfig";
 
+interface ParsedOscConfig {
+    senderIp: string;
+    inPort: number;
+    timeoutSec: number;
+    generalJoinAddress: string;
+    specificJoinAddress?: string;
+}
+
+
 let client: osc.Client;
 
 /**
@@ -10,24 +19,35 @@ let client: osc.Client;
  let notifingCountGeneral = 0;
  let notifingCountSpecific = 0;
 
+function parseOscConfig(config: OscConfig): ParsedOscConfig {
+    return {
+        senderIp: config.senderIp,
+        inPort: parseInt(config.inPort, 10),
+        timeoutSec: parseFloat(config.timeoutSec),
+        generalJoinAddress: config.generalJoinAddress,
+        specificJoinAddress: config.specificJoinAddress
+    }
+}
+
 export function sendJoinOsc(config: OscConfig): void {
-    if (!client) createClient(config.host, config.sendPort);
+    const conf = parseOscConfig(config);
+    if (!client) createClient(conf.senderIp, conf.inPort);
 
     // NOTE: Bundleを検討する余地がある。但し、VRChatのOSCがBundleを正常に処理するかは実装依存である
     // @see https://github.com/vrchat/osccore/tree/all-in-one
-    sendOsc(config.generalJoinAddress, {type: "boolean", value: true})
+    sendOsc(conf.generalJoinAddress, {type: "boolean", value: true})
         .then(async () => {
             notifingCountGeneral += 1;
-            await sleep(config.resetTime * 1000);
+            await sleep(conf.timeoutSec * 1000);
             notifingCountGeneral -= 1;
-            if (notifingCountGeneral === 0) await sendOsc(config.generalJoinAddress, {type: "boolean", value: false});
+            if (notifingCountGeneral === 0) await sendOsc(conf.generalJoinAddress, {type: "boolean", value: false});
         });
-    if (config.specificJoinAddress) sendOsc(config.specificJoinAddress, {type: "boolean", value: true})
+    if (conf.specificJoinAddress) sendOsc(conf.specificJoinAddress, {type: "boolean", value: true})
         .then(async () => {
             notifingCountSpecific += 1;
-            await sleep(config.resetTime * 1000);
+            await sleep(conf.timeoutSec * 1000);
             notifingCountSpecific -= 1;
-            if (notifingCountSpecific === 0) await sendOsc(config.specificJoinAddress!, {type: "boolean", value: false});
+            if (notifingCountSpecific === 0) await sendOsc(conf.specificJoinAddress!, {type: "boolean", value: false});
         });
 }
 

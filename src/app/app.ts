@@ -26,10 +26,10 @@ const defaultAppConfig: AppConfig = {
 }
 
 const defaultOscConfig: OscConfig = {
-    host: "127.0.0.1",
-    sendPort: "9000",
+    senderIp: "127.0.0.1",
+    inPort: "9000",
     timeoutSec: "3",
-    generalJoinAddress: "dummy"
+    generalJoinAddress: "dummy parameter path"
 };
 
 export interface AppContext {

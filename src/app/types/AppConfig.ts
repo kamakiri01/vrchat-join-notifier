@@ -39,9 +39,12 @@ export interface AppConfig {
     osc?: OscConfig;
 }
 
+/**
+ * @see https://docs.vrchat.com/v2022.1.1/docs/osc-overview
+ */
 export interface OscConfig {
-    host: string;
-    sendPort: string;
+    senderIp: string;
+    inPort: string;
     timeoutSec: string;
     generalJoinAddress: string;
     specificJoinAddress?: string;
