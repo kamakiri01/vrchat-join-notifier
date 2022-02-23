@@ -1,5 +1,6 @@
 /**
  * app が外部から受け取るパラメータ
+ * cli prompt から受け取るため全て string
  */
  export interface AppParameterObject {
     interval?: string;
@@ -40,8 +41,8 @@ export interface AppConfig {
 
 export interface OscConfig {
     host: string;
-    sendPort: number;
-    resetTime: number; // sec単位
+    sendPort: string;
+    timeoutSec: string;
     generalJoinAddress: string;
     specificJoinAddress?: string;
 }

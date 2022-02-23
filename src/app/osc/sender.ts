@@ -15,19 +15,19 @@ export function sendJoinOsc(config: OscConfig): void {
 
     // NOTE: Bundleを検討する余地がある。但し、VRChatのOSCがBundleを正常に処理するかは実装依存である
     // @see https://github.com/vrchat/osccore/tree/all-in-one
-    sendOsc(config.generalJoinAddress, {type: "integer", value: 1})
+    sendOsc(config.generalJoinAddress, {type: "boolean", value: true})
         .then(async () => {
             notifingCountGeneral += 1;
-            await sleep(config.resetTime);
+            await sleep(config.resetTime * 1000);
             notifingCountGeneral -= 1;
-            if (notifingCountGeneral === 0) await sendOsc(config.generalJoinAddress, {type: "integer", value: 0});
+            if (notifingCountGeneral === 0) await sendOsc(config.generalJoinAddress, {type: "boolean", value: false});
         });
-    if (config.specificJoinAddress) sendOsc(config.specificJoinAddress, {type: "integer", value: 1})
+    if (config.specificJoinAddress) sendOsc(config.specificJoinAddress, {type: "boolean", value: true})
         .then(async () => {
             notifingCountSpecific += 1;
-            await sleep(config.resetTime);
+            await sleep(config.resetTime * 1000);
             notifingCountSpecific -= 1;
-            if (notifingCountSpecific === 0) await sendOsc(config.specificJoinAddress!, {type: "integer", value: 0});
+            if (notifingCountSpecific === 0) await sendOsc(config.specificJoinAddress!, {type: "boolean", value: false});
         });
 }
 
