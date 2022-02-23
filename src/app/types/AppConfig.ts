@@ -15,7 +15,7 @@
     verbose?: boolean;
     noUpdate?: boolean;
     noCheckUpdate?: boolean;
-    osc?: OscConfig;
+    osc?: Partial<OscConfig>;
 }
 
 /**
@@ -39,7 +39,9 @@ export interface AppConfig {
 }
 
 export interface OscConfig {
+    host: string;
     sendPort: number;
-    generalSendAddress?: string;
-    specificSendAddress?: string;   
+    resetTime: number; // sec単位
+    generalJoinAddress: string;
+    specificJoinAddress?: string;
 }
