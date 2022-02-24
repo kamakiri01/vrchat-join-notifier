@@ -5,7 +5,6 @@ import { app } from "./app/app";
 import { readConfigFile } from "./app/util/util";
 
 const version = JSON.parse(fs.readFileSync(path.resolve(__dirname, "..", "package.json"), "utf8")).version;
-
 program
     .version(version, "-v, --version", "output the current version");
 
@@ -26,8 +25,8 @@ program
     .option("--osc-sender-ip", "OSC destination host")
     .option("--osc-in-port", "OSC destination port")
     .option("--osc-timeout-sec", "time to reset sent OSC parameter")
-    .option("--osc-general-join-address", "OSC destination address")
-    .option("--osc-specific-join-address", "OSC destination address for specific names")
+    .option("--osc-general-join-address <address>", "OSC destination address. (NOTE: msys/MinGW auto convert look like Unix paths[/foo/bar] to Windows[C:\\...]. use MSYS2_ARG_CONV_EXCL or some else)")
+    .option("--osc-specific-join-address <address>.", "OSC destination address for specific names")
     // .option("-nu, --no-update", "no update")
     // .option("-nc, --no-check-update", "no check update")
 
