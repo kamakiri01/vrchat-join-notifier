@@ -57,7 +57,6 @@ export function app(param: AppParameterObject): void {
 
 function _app(param: AppParameterObject) {
     const config = generateAppConfig(param);
-    console.log("config", config);
     const interval = parseInt(config.interval, 10)
     const context = initContext(config);
     showInitNotification(config);
