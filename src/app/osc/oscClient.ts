@@ -44,11 +44,7 @@ export class OscClient {
     }
 
     send(message: Message, callback: (err?: any) => void) {
-        try {
-            const buf = oscMin.toBuffer(message);
-            this.sock.send(buf, 0, buf.length, this.port, this.host, callback);
-        } catch (e: any) {
-            throw e;
-        }
+        const buf = oscMin.toBuffer(message);
+        this.sock.send(buf, 0, buf.length, this.port, this.host, callback);
     }
 }
