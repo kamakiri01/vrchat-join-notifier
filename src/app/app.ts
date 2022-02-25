@@ -29,7 +29,7 @@ const defaultOscConfig: OscConfig = {
     senderIp: "127.0.0.1",
     inPort: "9000",
     timeoutSec: "3",
-    generalJoinAddress: "dummy parameter path"
+    generalJoinAddress: undefined!
 };
 
 export interface AppContext {
@@ -57,6 +57,7 @@ export function app(param: AppParameterObject): void {
 
 function _app(param: AppParameterObject) {
     const config = generateAppConfig(param);
+    console.log("config", config);
     const interval = parseInt(config.interval, 10)
     const context = initContext(config);
     showInitNotification(config);
@@ -125,17 +126,19 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
         if (param[key] != null) config[key] = param[key];
     })
 
-    if (param.osc && param.osc.generalJoinAddress) {
+    if (param.osc && (param.osc.generalJoinAddress || param.osc.specificJoinAddress)) {
         config.osc = JSON.parse(JSON.stringify(defaultOscConfig));
         (Object.keys(param.osc) as (keyof OscConfig)[]).forEach(key => {
             if (param.osc![key] != null) config.osc[key] = param.osc![key];
         })
+    } else {
+        config.osc = undefined;
     }
 
     // TODO: notificationTypes が増えたら type を切る
     if (config.notificationTypes.filter((e: string) => {return e !== "join" && e !== "leave";}).length > 0) {
         console.log("unknown config [notificationTypes] found, " + config.notificationTypes);
-    };
+    }
     return config;
 }
 

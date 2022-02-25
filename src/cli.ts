@@ -24,9 +24,9 @@ program
     .option("-V, --verbose", "display full log details")
     .option("--osc-sender-ip", "OSC destination host")
     .option("--osc-in-port", "OSC destination port")
-    .option("--osc-timeout-sec", "time to reset sent OSC parameter")
     .option("--osc-general-join-address <address>", "OSC destination address. (NOTE: msys/MinGW auto convert look like Unix paths[/foo/bar] to Windows[C:\\...]. use MSYS2_ARG_CONV_EXCL or some else)")
     .option("--osc-specific-join-address <address>.", "OSC destination address for specific names")
+    .option("--osc-timeout-sec", "time to reset sent OSC parameter")
     // .option("-nu, --no-update", "no update")
     // .option("-nc, --no-check-update", "no check update")
 
@@ -49,13 +49,13 @@ export async function run(argv: any): Promise<void> {
         config.xsoverlayTimeout =  program["xsoverlayTimeout"];
         config.verbose =           program["verbose"];
 
-        if (program["oscGeneralJoinAddress"]) {
+        if (program["oscGeneralJoinAddress"] || program["oscSpecificJoinAddress"]) {
             config.osc = {};
             config.osc.senderIp =            program["oscSenderIp"];
             config.osc.inPort =              program["oscInPort"];
-            config.osc.timeoutSec =          program["oscTimeoutSec"];
             config.osc.generalJoinAddress  = program["oscGeneralJoinAddress"];
             config.osc.specificJoinAddress = program["oscSpecificJoinAddress"];
+            config.osc.timeoutSec =          program["oscTimeoutSec"];
         }
 
         // cli向けアップデート機能は提供していないため無効化する
