@@ -12,7 +12,8 @@
   "files": [
     "./typings/latestJson.d.ts",
     "./typings/packageJsonReduced.d.ts",
-    "./typings/powertoast.d.ts"
+    "./typings/powertoast.d.ts",
+    "./typings/osc-min.d.ts"
   ],
   "include": [
     "./src/**/*"
