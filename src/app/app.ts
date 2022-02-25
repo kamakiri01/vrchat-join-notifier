@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
-import { AppConfig, AppParameterObject } from "./types/AppConfig";
+import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
 import { checkNewJoin, checkNewLeave, findOwnUserName } from "./updater";
 import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
@@ -24,6 +24,13 @@ const defaultAppConfig: AppConfig = {
     noUpdate: false,
     noCheckUpdate: false
 }
+
+const defaultOscConfig: OscConfig = {
+    senderIp: "127.0.0.1",
+    inPort: "9000",
+    timeoutSec: "3",
+    generalJoinAddress: undefined!
+};
 
 export interface AppContext {
     config: AppConfig;
@@ -117,9 +124,20 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
     (Object.keys(param) as (keyof AppParameterObject)[]).forEach(key => {
         if (param[key] != null) config[key] = param[key];
     })
+
+    if (param.osc && (param.osc.generalJoinAddress || param.osc.specificJoinAddress)) {
+        config.osc = JSON.parse(JSON.stringify(defaultOscConfig));
+        (Object.keys(param.osc) as (keyof OscConfig)[]).forEach(key => {
+            if (param.osc![key] != null) config.osc[key] = param.osc![key];
+        })
+    } else {
+        config.osc = undefined;
+    }
+
     // TODO: notificationTypes が増えたら type を切る
-    if (config.notificationTypes.filter((e: string) => {return e !== "join" && e !== "leave";}).length > 0)
+    if (config.notificationTypes.filter((e: string) => {return e !== "join" && e !== "leave";}).length > 0) {
         console.log("unknown config [notificationTypes] found, " + config.notificationTypes);
+    }
     return config;
 }
 
@@ -142,7 +160,6 @@ function loop(context: AppContext): void {
         if (!context.config.verbose) return;
         console.log("ERR", error);
     }
-
 }
 
 function getLatestLog(): ActivityLog[] | null {

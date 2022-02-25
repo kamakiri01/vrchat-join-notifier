@@ -1,7 +1,7 @@
 {
     /**
-     * 更新間隔を指定します。1秒以下にするとCPU負荷が増えます。
-     * Specifies the interval between updates; anything less than 1 second will increase the CPU load.
+     * 更新間隔を指定します。1秒以下にするとCPU負荷が増えます。（単位: 秒）
+     * Specifies the interval between updates; anything less than 1 second will increase the CPU load. [sec]
      */
     "interval": "2",
 
@@ -27,7 +27,7 @@
 
     /**
      * 任意のユーザ名を通知したとき、実行するコマンドを指定します。
-     * Specifies the command to be executed when any user name is notified.
+     * Specifies the command to be executed when  user name is notified.
      * example: "echo ${{names}}" -> $ echo myFriendName1 myFriendNAme2
      */
      "generalExec": null,
@@ -72,5 +72,41 @@
      * 【無料版のみ】アプリケーションの更新チェックを無効にします。 (true or false)
      * [free version only] Disable update check. (true or false)
      */
-     "noCheckUpdate": false
+     "noCheckUpdate": false,
+
+    /**
+     * OSC 設定
+     * reference: https://docs.vrchat.com/docs/osc-overview
+     */
+//    "osc": {
+//        /**
+//         * OSC の送信先ネットワークアドレスを指定します。
+//         * Specifies the destination network address for OSC.
+//         */
+//        "senderIp": "127.0.0.1",
+//
+//        /**
+//         * OSC の送信先ポート番号を指定します。
+//         * Specifies the destination port number for OSC.
+//         */
+//        "inPort": "9000",
+//
+//        /**
+//         * 任意のユーザが join したときの通知先アバターパラメータのアドレスを指定します。
+//         * Specifies the address of the avatar parameter  when any user joins.
+//         */
+//        "generalJoinAddress": "/avatar/parameters/PopupMyItem",
+//
+//        /**
+//         * specificNames で指定したユーザが join したときの通知先アバターパラメータのアドレスを指定します。
+//         * Specifies the address of the avatar parameter when user specified by specificNames joins.
+//         */
+//        "specificJoinAddress": "/avatar/parameters/PopupMySpecialItem",
+//
+//        /**
+//         * true を送ってから false を送るまでの時間を指定します。（単位: 秒）
+//         * Specifies the time between sending true and sending false. [sec]
+//         */
+//         "timeoutSec": "3"
+//    }
 }
