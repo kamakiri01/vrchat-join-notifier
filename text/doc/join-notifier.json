@@ -76,7 +76,7 @@
 
     /**
      * OSC 設定
-     * reference: https://docs.vrchat.com/v2022.1.1/docs/osc-overview
+     * reference: https://docs.vrchat.com/docs/osc-overview
      */
 //    "osc": {
 //        /**
