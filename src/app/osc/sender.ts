@@ -1,5 +1,5 @@
-import * as osc from "node-osc";
 import { OscConfig } from "../types/AppConfig";
+import { Argument, Message, OscClient } from "./oscClient";
 
 interface ParsedOscConfig {
     senderIp: string;
@@ -9,8 +9,7 @@ interface ParsedOscConfig {
     specificJoinAddress?: string;
 }
 
-
-let client: osc.Client;
+let client: OscClient;
 
 /**
  * 送信してからresetTime経過していないsendの数
@@ -51,9 +50,9 @@ export function sendJoinOsc(config: OscConfig): void {
         });
 }
 
-function sendOsc(address: string, value: osc.Argument): Promise<void> {
+function sendOsc(address: string, value: Argument): Promise<void> {
     return new Promise((resolve, reject) => {
-        const message = new osc.Message(address);
+        const message = new Message(address);
         message.append(value);
         client.send(message, (err: any) => {
           if (err) return reject(err);
@@ -63,7 +62,7 @@ function sendOsc(address: string, value: osc.Argument): Promise<void> {
 }
 
 function createClient(host: string, port: number) {
-    client = new osc.Client(host, port);
+    client = new OscClient(host, port);
 }
 
 const sleep = (msec: number) => new Promise(resolve => setTimeout(resolve, msec));

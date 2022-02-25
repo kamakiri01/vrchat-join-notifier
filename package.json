@@ -1,6 +1,6 @@
 {
   "name": "vrchat-join-notifier",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Notify when someone joins the same instance",
   "engines": {
     "node": ">=12.x"
@@ -15,7 +15,8 @@
     "deploy:win-standalone:text": "cpx --clean ./text/doc/** ./vrchat-join-notifier/",
     "deploy:win-standalone:exe": "nexe lib/winExeStandalone.js --target 12.18.2 -o vrchat-join-notifier/vrchat-join-notifier.exe",
     "deploy:win-standalone:zip": "powershell compress-archive vrchat-join-notifier/ vrchat-join-notifier.zip -Force",
-    "deploy:win-for-launcher": "npm run deploy:win-for-launcher:exe",
+    "deploy:win-for-launcher": "npm run deploy:win-for-launcher:exe && npm run deploy:win-launcher:text",
+    "deploy:win-launcher:text": "cpx --clean ./text/doc/**/*.{json} ./vrchat-join-notifier-for-launcher/",
     "deploy:win-for-launcher:exe": "nexe lib/winExeLauncher.js --target 12.18.2 -o vrchat-join-notifier-for-launcher/vrchat-join-notifier.exe",
     "release": "npm run release:web-update",
     "release:web-update": "npm run release:web-update:json && npm run release:web-update:zip",
@@ -34,7 +35,7 @@
     "commander": "^6.2.0",
     "jsonc-parser": "^3.0.0",
     "node-fetch": "^2.6.6",
-    "node-osc": "^6.1.14",
+    "osc-min": "^1.1.2",
     "powertoast": "^1.2.3",
     "unzipper": "^0.10.11",
     "vrchat-activity-viewer": "^5.1.0"
@@ -42,7 +43,6 @@
   "devDependencies": {
     "@types/node": "^14.14.43",
     "@types/node-fetch": "^2.5.12",
-    "@types/node-osc": "^6.0.0",
     "@types/unzipper": "^0.10.5",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
