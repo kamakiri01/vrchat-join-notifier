@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewJoin, checkNewLeave, findOwnUserName } from "./updater";
+import { checkNewExit, checkNewJoin, checkNewLeave, findOwnUserName } from "./updater";
 import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
 import { initTmpDir } from "./util/util";
@@ -38,7 +38,7 @@ export interface AppContext {
     latestCheckTime: number;
     newJoinUserNames: string[];
     newLeaveUserNames: string[];
-    newExit: false; // そのloopでexitログがあったかどうか
+    newExit: boolean; // そのloopでexitログがあったかどうか
 }
 
 export function app(param: AppParameterObject): void {
@@ -161,6 +161,7 @@ function loop(context: AppContext): void {
         if (!context.userName) findOwnUserName(latestLog, context);
         if (context.config.notificationTypes.indexOf("join") !== -1) checkNewJoin(latestLog, context, boundaryTime);
         if (context.config.notificationTypes.indexOf("leave") !== -1) checkNewLeave(latestLog, context, boundaryTime);
+        checkNewExit(latestLog, context, boundaryTime);
 
         comsumeNewJoin(context);
         consumeNewLeave(context);

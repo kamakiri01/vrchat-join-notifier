@@ -30,3 +30,11 @@ export function checkNewLeave(latestLog: ActivityLog[], context: AppContext, bou
         context.latestCheckTime = Math.max(latestLogTime, context.latestCheckTime);
     }
 }
+
+export function checkNewExit(latestLog: ActivityLog[], context: AppContext, boundaryTime: number) {
+    const newExitLog = latestLog
+        .filter(e => e.activityType === ActivityType.Exit)
+        .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
+    
+        if (newExitLog.length > 0) context.newExit = true;
+}
