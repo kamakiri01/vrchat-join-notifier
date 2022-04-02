@@ -38,6 +38,7 @@ export interface AppContext {
     latestCheckTime: number;
     newJoinUserNames: string[];
     newLeaveUserNames: string[];
+    newExit: false; // そのloopでexitログがあったかどうか
 }
 
 export function app(param: AppParameterObject): void {
@@ -115,8 +116,15 @@ function initContext(config: AppConfig): AppContext {
         userName: undefined,
         latestCheckTime: Date.now(),
         newJoinUserNames: [],
-        newLeaveUserNames: []
+        newLeaveUserNames: [],
+        newExit: false
     }
+}
+
+function resetContext(context: AppContext): void {
+    context.newJoinUserNames = [];
+    context.newLeaveUserNames = [];
+    context.newExit = false;
 }
 
 function generateAppConfig(param: AppParameterObject): AppConfig {
@@ -156,6 +164,7 @@ function loop(context: AppContext): void {
 
         comsumeNewJoin(context);
         consumeNewLeave(context);
+        resetContext(context);
     } catch (error) {
         if (!context.config.verbose) return;
         console.log("ERR", error);

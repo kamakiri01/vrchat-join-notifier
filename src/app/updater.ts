@@ -9,7 +9,6 @@ export function findOwnUserName(latestLog: ActivityLog[], context: AppContext): 
 }
 
 export function checkNewJoin(latestLog: ActivityLog[], context: AppContext, boundaryTime: number): void {
-    context.newJoinUserNames = [];
     const newJoinLog = latestLog
         .filter(e => e.activityType === ActivityType.Join)
         .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
@@ -21,7 +20,6 @@ export function checkNewJoin(latestLog: ActivityLog[], context: AppContext, boun
     }
 }
 export function checkNewLeave(latestLog: ActivityLog[], context: AppContext, boundaryTime: number): void {
-    context.newLeaveUserNames = [];
     const newLeaveLog = latestLog
         .filter(e => e.activityType === ActivityType.Leave)
         .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
