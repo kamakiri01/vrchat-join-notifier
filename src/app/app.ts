@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewJoin, checkNewLeave, findOwnUserName } from "./updater";
+import { checkNewExit, checkNewJoin, checkNewLeave, findOwnUserName } from "./updater";
 import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
 import { initTmpDir } from "./util/util";
@@ -38,6 +38,7 @@ export interface AppContext {
     latestCheckTime: number;
     newJoinUserNames: string[];
     newLeaveUserNames: string[];
+    newExit: boolean; // そのloopでexitログがあったかどうか
 }
 
 export function app(param: AppParameterObject): void {
@@ -115,8 +116,15 @@ function initContext(config: AppConfig): AppContext {
         userName: undefined,
         latestCheckTime: Date.now(),
         newJoinUserNames: [],
-        newLeaveUserNames: []
+        newLeaveUserNames: [],
+        newExit: false
     }
+}
+
+function resetContext(context: AppContext): void {
+    context.newJoinUserNames = [];
+    context.newLeaveUserNames = [];
+    context.newExit = false;
 }
 
 function generateAppConfig(param: AppParameterObject): AppConfig {
@@ -146,6 +154,7 @@ function loop(context: AppContext): void {
         const latestLog = getLatestLog();
         if (!latestLog) return;
 
+        resetContext(context);
         // NOTE: ログファイルの書き込みと読み込みタイミングがバッティングした場合、最新ログを取りこぼすケースが考えられる
         // notifierが取得するログの範囲を最新時刻より手前までの範囲に制限し、バッティングによる取りこぼしを抑制する
         // boundaryTimeより後のログはnotifierに届かないため、latestCheckTimeがboundaryTimeを追い越すことは無い
@@ -153,6 +162,7 @@ function loop(context: AppContext): void {
         if (!context.userName) findOwnUserName(latestLog, context);
         if (context.config.notificationTypes.indexOf("join") !== -1) checkNewJoin(latestLog, context, boundaryTime);
         if (context.config.notificationTypes.indexOf("leave") !== -1) checkNewLeave(latestLog, context, boundaryTime);
+        checkNewExit(latestLog, context, boundaryTime);
 
         comsumeNewJoin(context);
         consumeNewLeave(context);

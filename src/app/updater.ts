@@ -9,7 +9,6 @@ export function findOwnUserName(latestLog: ActivityLog[], context: AppContext): 
 }
 
 export function checkNewJoin(latestLog: ActivityLog[], context: AppContext, boundaryTime: number): void {
-    context.newJoinUserNames = [];
     const newJoinLog = latestLog
         .filter(e => e.activityType === ActivityType.Join)
         .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
@@ -21,7 +20,6 @@ export function checkNewJoin(latestLog: ActivityLog[], context: AppContext, boun
     }
 }
 export function checkNewLeave(latestLog: ActivityLog[], context: AppContext, boundaryTime: number): void {
-    context.newLeaveUserNames = [];
     const newLeaveLog = latestLog
         .filter(e => e.activityType === ActivityType.Leave)
         .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
@@ -31,4 +29,12 @@ export function checkNewLeave(latestLog: ActivityLog[], context: AppContext, bou
         const latestLogTime = newLeaveLog.map(e => e.date).sort().pop()!;
         context.latestCheckTime = Math.max(latestLogTime, context.latestCheckTime);
     }
+}
+
+export function checkNewExit(latestLog: ActivityLog[], context: AppContext, boundaryTime: number) {
+    const newExitLog = latestLog
+        .filter(e => e.activityType === ActivityType.Exit)
+        .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
+
+        if (newExitLog.length > 0) context.newExit = true;
 }

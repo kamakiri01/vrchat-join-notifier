@@ -14,18 +14,18 @@ export function comsumeNewJoin(context: AppContext): void {
     }
     showNotification("join", context.newJoinUserNames, isSpecific, context.config);
     if (context.config.osc) sendJoinOsc(context.config.osc);
-
-    context.newJoinUserNames = [];
 }
 
 export function consumeNewLeave(context: AppContext): void {
     if (context.newLeaveUserNames.length == 0) return;
-    if (!!context.userName && context.newLeaveUserNames.indexOf(context.userName) !== -1) {
-        context.newLeaveUserNames = [];
-        return; // self leave
+    if (
+        // ユーザ名が含まれているか、退室ログがある場合はleave通知をしない
+        (!!context.userName && context.newLeaveUserNames.indexOf(context.userName) !== -1) ||
+        context.newExit
+        ) {
+        return;
     }
     showNotification("leave", context.newLeaveUserNames, false, context.config);
-    context.newLeaveUserNames = [];
 }
 
 function isIncludeSpecificNames(names: string[], specificNames: string[]): boolean {
