@@ -35,6 +35,6 @@ export function checkNewExit(latestLog: ActivityLog[], context: AppContext, boun
     const newExitLog = latestLog
         .filter(e => e.activityType === ActivityType.Exit)
         .filter(e => (e.date > context.latestCheckTime) && (e.date < boundaryTime));
-    
+
         if (newExitLog.length > 0) context.newExit = true;
 }

@@ -154,6 +154,7 @@ function loop(context: AppContext): void {
         const latestLog = getLatestLog();
         if (!latestLog) return;
 
+        resetContext(context);
         // NOTE: ログファイルの書き込みと読み込みタイミングがバッティングした場合、最新ログを取りこぼすケースが考えられる
         // notifierが取得するログの範囲を最新時刻より手前までの範囲に制限し、バッティングによる取りこぼしを抑制する
         // boundaryTimeより後のログはnotifierに届かないため、latestCheckTimeがboundaryTimeを追い越すことは無い
@@ -165,7 +166,6 @@ function loop(context: AppContext): void {
 
         comsumeNewJoin(context);
         consumeNewLeave(context);
-        resetContext(context);
     } catch (error) {
         if (!context.config.verbose) return;
         console.log("ERR", error);
