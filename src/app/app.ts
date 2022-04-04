@@ -2,10 +2,10 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewExit, checkNewJoin, checkNewLeave, findOwnUserName } from "./updater";
+import { checkNewExit, checkNewJoin, checkNewLeave, CheckResult, findOwnUserName } from "./updater";
 import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
-import { initTmpDir } from "./util/util";
+import { generateFormulatedTime, initTmpDir } from "./util/util";
 import * as appUpdater from "./util/appUpdater";
 import { launchUpdatedApp } from "./util/launchNewProcess";
 
@@ -34,11 +34,7 @@ const defaultOscConfig: OscConfig = {
 
 export interface AppContext {
     config: AppConfig;
-    userName: string | undefined; // ツールを利用するユーザのVRChat名。ログから見つからない場合、 undefined
     latestCheckTime: number;
-    newJoinUserNames: string[];
-    newLeaveUserNames: string[];
-    newExit: boolean; // そのloopでexitログがあったかどうか
 }
 
 export function app(param: AppParameterObject): void {
@@ -113,18 +109,8 @@ function wipeOldFiles() {
 function initContext(config: AppConfig): AppContext {
     return {
         config,
-        userName: undefined,
-        latestCheckTime: Date.now(),
-        newJoinUserNames: [],
-        newLeaveUserNames: [],
-        newExit: false
+        latestCheckTime: Date.now()
     }
-}
-
-function resetContext(context: AppContext): void {
-    context.newJoinUserNames = [];
-    context.newLeaveUserNames = [];
-    context.newExit = false;
 }
 
 function generateAppConfig(param: AppParameterObject): AppConfig {
@@ -154,18 +140,19 @@ function loop(context: AppContext): void {
         const latestLog = getLatestLog();
         if (!latestLog) return;
 
-        resetContext(context);
         // NOTE: ログファイルの書き込みと読み込みタイミングがバッティングした場合、最新ログを取りこぼすケースが考えられる
         // notifierが取得するログの範囲を最新時刻より手前までの範囲に制限し、バッティングによる取りこぼしを抑制する
         // boundaryTimeより後のログはnotifierに届かないため、latestCheckTimeがboundaryTimeを追い越すことは無い
         const boundaryTime = Date.now() - 500; // バッティング回避マージンとして0.5sec確保する
-        if (!context.userName) findOwnUserName(latestLog, context);
-        if (context.config.notificationTypes.indexOf("join") !== -1) checkNewJoin(latestLog, context, boundaryTime);
-        if (context.config.notificationTypes.indexOf("leave") !== -1) checkNewLeave(latestLog, context, boundaryTime);
-        checkNewExit(latestLog, context, boundaryTime);
 
-        comsumeNewJoin(context);
-        consumeNewLeave(context);
+        const checkJoinResult: CheckResult =(context.config.notificationTypes.indexOf("join") !== -1) ?
+            checkNewJoin(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
+        const checkLeaveResult: CheckResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
+            checkNewLeave(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
+        const isExit = checkNewExit(latestLog, context.latestCheckTime, boundaryTime);
+
+        comsumeNewJoin(context, checkJoinResult);
+        if (!isExit) consumeNewLeave(context, checkLeaveResult);
     } catch (error) {
         if (!context.config.verbose) return;
         console.log("ERR", error);
