@@ -18,9 +18,6 @@ export function checkNewJoin(latestLog: ActivityLog[], latestCheckTime: number, 
         .filter(e => (e.date > latestCheckTime) && (e.date < boundaryTime));
 
     if (newJoinLog.length > 0) {
-        // const newJoinUserNames = newJoinLog.map(e => (<MoveActivityLog>e).userData.userName);
-        // const latestLogTime = newJoinLog.map(e => e.date).sort().pop()!;
-        // context.latestCheckTime = Math.max(latestLogTime, context.latestCheckTime);
         return {
             userNames: newJoinLog.map(e => (<MoveActivityLog>e).userData.userName),
             latestLogTime: newJoinLog.map(e => e.date).sort().pop()!
@@ -35,8 +32,6 @@ export function checkNewLeave(latestLog: ActivityLog[], latestCheckTime: number,
         .filter(e => (e.date > latestCheckTime) && (e.date < boundaryTime));
 
     if (newLeaveLog.length > 0) {
-        // const latestLogTime = newLeaveLog.map(e => e.date).sort().pop()!;
-        // context.latestCheckTime = Math.max(latestLogTime, context.latestCheckTime);
         return {
             userNames: newLeaveLog.map(e => (<MoveActivityLog>e).userData.userName),
             latestLogTime: newLeaveLog.map(e => e.date).sort().pop()!

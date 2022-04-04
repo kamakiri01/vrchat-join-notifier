@@ -2,10 +2,10 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewExit, checkNewJoin, checkNewLeave, CheckResult, findOwnUserName } from "./updater";
+import { checkNewExit, checkNewJoin, checkNewLeave, CheckResult } from "./updater";
 import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
-import { generateFormulatedTime, initTmpDir } from "./util/util";
+import { initTmpDir } from "./util/util";
 import * as appUpdater from "./util/appUpdater";
 import { launchUpdatedApp } from "./util/launchNewProcess";
 
