@@ -151,6 +151,7 @@ function loop(context: AppContext): void {
             checkNewLeave(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
         const isExit = checkNewExit(latestLog, context.latestCheckTime, boundaryTime);
 
+        context.latestCheckTime = Math.max(context.latestCheckTime, checkJoinResult.latestLogTime, checkLeaveResult.latestLogTime);
         comsumeNewJoin(context, checkJoinResult);
         if (!isExit) consumeNewLeave(context, checkLeaveResult);
     } catch (error) {
