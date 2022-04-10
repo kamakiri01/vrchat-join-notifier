@@ -2,30 +2,24 @@ import { execSync } from "child_process";
 import { AppContext } from "./app";
 import { showNotification } from "./notifier/notifier";
 import { sendJoinOsc } from "./osc/sender";
+import { CheckResult } from "./updater";
 
-export function comsumeNewJoin(context: AppContext): void {
-    if (context.newJoinUserNames.length === 0) return;
+export function comsumeNewJoin(context: AppContext, checkResult: CheckResult): void {
+    if (checkResult.userNames.length === 0) return;
 
-    if (context.config.generalExec) exec(context.config.generalExec, context.newJoinUserNames);
+    if (context.config.generalExec) exec(context.config.generalExec, checkResult.userNames);
 
-    const isSpecific = isIncludeSpecificNames(context.newJoinUserNames, context.config.specificNames);
+    const isSpecific = isIncludeSpecificNames(checkResult.userNames, context.config.specificNames);
     if (isSpecific && context.config.specificExec) {
-        exec(context.config.specificExec, context.newJoinUserNames);
+        exec(context.config.specificExec, checkResult.userNames);
     }
-    showNotification("join", context.newJoinUserNames, isSpecific, context.config);
+    showNotification("join", checkResult.userNames, isSpecific, context.config);
     if (context.config.osc) sendJoinOsc(context.config.osc);
 }
 
-export function consumeNewLeave(context: AppContext): void {
-    if (context.newLeaveUserNames.length == 0) return;
-    if (
-        // ユーザ名が含まれているか、退室ログがある場合はleave通知をしない
-        (!!context.userName && context.newLeaveUserNames.indexOf(context.userName) !== -1) ||
-        context.newExit
-        ) {
-        return;
-    }
-    showNotification("leave", context.newLeaveUserNames, false, context.config);
+export function consumeNewLeave(context: AppContext, checkResult: CheckResult): void {
+    if (checkResult.userNames.length == 0) return;
+    showNotification("leave", checkResult.userNames, false, context.config);
 }
 
 function isIncludeSpecificNames(names: string[], specificNames: string[]): boolean {
