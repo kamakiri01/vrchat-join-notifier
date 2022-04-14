@@ -173,8 +173,7 @@ function getLatestLog(): ActivityLog[] | null {
         fs.readFileSync(path.resolve(filePath), "utf8"), false);
 }
 
-// 退室ログが存在するか、leaveユーザ名に自身のdisplayNameが含まれる場合は通知しない
+// 退室時か、leaveユーザ名リストに自身のdisplayNameが含まれる場合は通知しない
 function isNoNeedToNotifiyLeave(isExit: boolean, userName: string | null, leaveUserNames: string[]): boolean {
-    if (isExit) return true;
-    return !!userName && leaveUserNames.indexOf(userName) !== -1;
+    return isExit || (!!userName && leaveUserNames.indexOf(userName) !== -1);
 }
