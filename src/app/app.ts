@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewExit, checkNewJoin, checkNewLeave, CheckResult } from "./updater";
+import { checkNewExit, checkNewJoin, checkNewLeave, CheckResult, findOwnUserName } from "./updater";
 import { comsumeNewJoin, consumeNewLeave } from "./consumer";
 import { showInitNotification } from "./notifier/notifier";
 import { initTmpDir } from "./util/util";
@@ -35,6 +35,7 @@ const defaultOscConfig: OscConfig = {
 export interface AppContext {
     config: AppConfig;
     latestCheckTime: number;
+    userName: string | null;
 }
 
 export function app(param: AppParameterObject): void {
@@ -109,7 +110,8 @@ function wipeOldFiles() {
 function initContext(config: AppConfig): AppContext {
     return {
         config,
-        latestCheckTime: Date.now()
+        latestCheckTime: Date.now(),
+        userName: null
     }
 }
 
@@ -140,6 +142,8 @@ function loop(context: AppContext): void {
         const latestLog = getLatestLog();
         if (!latestLog) return;
 
+        if (!context.userName) context.userName = findOwnUserName(latestLog);
+
         // NOTE: ログファイルの書き込みと読み込みタイミングがバッティングした場合、最新ログを取りこぼすケースが考えられる
         // notifierが取得するログの範囲を最新時刻より手前までの範囲に制限し、バッティングによる取りこぼしを抑制する
         // boundaryTimeより後のログはnotifierに届かないため、latestCheckTimeがboundaryTimeを追い越すことは無い
@@ -153,7 +157,8 @@ function loop(context: AppContext): void {
 
         context.latestCheckTime = Math.max(context.latestCheckTime, checkJoinResult.latestLogTime, checkLeaveResult.latestLogTime);
         comsumeNewJoin(context, checkJoinResult);
-        if (!isExit) consumeNewLeave(context, checkLeaveResult);
+        if (isNoNeedToNotifiyLeave(isExit, context.userName, checkLeaveResult.userNames)) return;
+        consumeNewLeave(context, checkLeaveResult);
     } catch (error) {
         if (!context.config.verbose) return;
         console.log("ERR", error);
@@ -166,4 +171,10 @@ function getLatestLog(): ActivityLog[] | null {
 
     return parseVRChatLog(
         fs.readFileSync(path.resolve(filePath), "utf8"), false);
+}
+
+// 退室ログが存在するか、leaveユーザ名に自身のdisplayNameが含まれる場合は通知しない
+function isNoNeedToNotifiyLeave(isExit: boolean, userName: string | null, leaveUserNames: string[]): boolean {
+    if (isExit) return true;
+    return !!userName && leaveUserNames.indexOf(userName) !== -1;
 }
