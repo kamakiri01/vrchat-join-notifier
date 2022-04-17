@@ -153,11 +153,11 @@ function loop(context: AppContext): void {
             checkNewJoin(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
         const checkLeaveResult: CheckResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
             checkNewLeave(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
-        const isExit = checkNewExit(latestLog, context.latestCheckTime, boundaryTime);
+        const isOwnExit = checkNewExit(latestLog, context.latestCheckTime, boundaryTime);
 
         context.latestCheckTime = Math.max(context.latestCheckTime, checkJoinResult.latestLogTime, checkLeaveResult.latestLogTime);
         comsumeNewJoin(context, checkJoinResult);
-        if (isNoNeedToNotifiyLeave(isExit, context.userName, checkLeaveResult.userNames)) return;
+        if (isNoNeedToNotifiyLeave(isOwnExit, context.userName, checkLeaveResult.userNames)) return;
         consumeNewLeave(context, checkLeaveResult);
     } catch (error) {
         if (!context.config.verbose) return;
@@ -173,7 +173,7 @@ function getLatestLog(): ActivityLog[] | null {
         fs.readFileSync(path.resolve(filePath), "utf8"), false);
 }
 
-// 退室時か、leaveユーザ名リストに自身のdisplayNameが含まれる場合は通知しない
-function isNoNeedToNotifiyLeave(isExit: boolean, userName: string | null, leaveUserNames: string[]): boolean {
-    return isExit || (!!userName && leaveUserNames.indexOf(userName) !== -1);
+// 自身の退室時か、leaveユーザ名リストに自身のdisplayNameが含まれる場合は通知しない
+function isNoNeedToNotifiyLeave(isOwnExit: boolean, userName: string | null, leaveUserNames: string[]): boolean {
+    return isOwnExit || (!!userName && leaveUserNames.indexOf(userName) !== -1);
 }
