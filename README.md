@@ -14,8 +14,8 @@ $ ./bin/run -t join
 ### Install
 
 ```
-git clone git@github.com:kamakiri01/vrchat-join-notifier.git
-cd vrchat-join-notifier
+$ git clone git@github.com:kamakiri01/vrchat-join-notifier.git
+$ cd vrchat-join-notifier
 $ npm install
 $ npm run build
 ```
