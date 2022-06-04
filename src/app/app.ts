@@ -35,6 +35,7 @@ const defaultOscConfig: OscConfig = {
 export interface AppContext {
     config: AppConfig;
     latestCheckTime: number;
+    latestCheckedList: string[];
     userName: string | null;
 }
 
