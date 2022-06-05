@@ -2,24 +2,23 @@ import { execSync } from "child_process";
 import { AppContext } from "./app";
 import { showNotification } from "./notifier/notifier";
 import { sendJoinOsc } from "./osc/sender";
-import { CheckResult } from "./updater";
 
-export function comsumeNewJoin(context: AppContext, checkResult: CheckResult): void {
-    if (checkResult.userNames.length === 0) return;
+export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
+    if (userNames.length === 0) return;
 
-    if (context.config.generalExec) exec(context.config.generalExec, checkResult.userNames);
+    if (context.config.generalExec) exec(context.config.generalExec, userNames);
 
-    const isSpecific = isIncludeSpecificNames(checkResult.userNames, context.config.specificNames);
+    const isSpecific = isIncludeSpecificNames(userNames, context.config.specificNames);
     if (isSpecific && context.config.specificExec) {
-        exec(context.config.specificExec, checkResult.userNames);
+        exec(context.config.specificExec, userNames);
     }
-    showNotification("join", checkResult.userNames, isSpecific, context.config);
+    showNotification("join", userNames, isSpecific, context.config);
     if (context.config.osc) sendJoinOsc(context.config.osc);
 }
 
-export function consumeNewLeave(context: AppContext, checkResult: CheckResult): void {
-    if (checkResult.userNames.length == 0) return;
-    showNotification("leave", checkResult.userNames, false, context.config);
+export function consumeNewLeave(context: AppContext, userNames: string[]): void {
+    if (userNames.length == 0) return;
+    showNotification("leave", userNames, false, context.config);
 }
 
 function isIncludeSpecificNames(names: string[], specificNames: string[]): boolean {

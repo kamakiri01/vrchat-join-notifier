@@ -1,10 +1,5 @@
 import { ActivityLog, ActivityType, AuthenticationActivityLog, MoveActivityLog } from "vrchat-activity-viewer";
 
-export interface CheckResult {
-    userNames: string[];
-    latestLogTime: number;
-}
-
 export function findOwnUserName(latestLog: ActivityLog[]): string | null {
     const userName =
         (latestLog.find(e => e.activityType === ActivityType.Authentication) as AuthenticationActivityLog | undefined)?.userName ??
@@ -15,7 +10,7 @@ export function findOwnUserName(latestLog: ActivityLog[]): string | null {
 export function checkNewJoin(latestLog: ActivityLog[], latestCheckTime: number, boundaryTime: number): CheckResult {
     const newJoinLog = latestLog
         .filter(e => e.activityType === ActivityType.Join)
-        .filter(e => (e.date > latestCheckTime) && (e.date < boundaryTime));
+        .filter(e => (e.date >= latestCheckTime) && (e.date < boundaryTime));
 
     if (newJoinLog.length > 0) {
         return {
@@ -29,7 +24,7 @@ export function checkNewJoin(latestLog: ActivityLog[], latestCheckTime: number, 
 export function checkNewLeave(latestLog: ActivityLog[], latestCheckTime: number, boundaryTime: number): CheckResult {
     const newLeaveLog = latestLog
         .filter(e => e.activityType === ActivityType.Leave)
-        .filter(e => (e.date > latestCheckTime) && (e.date < boundaryTime));
+        .filter(e => (e.date >= latestCheckTime) && (e.date < boundaryTime));
 
     if (newLeaveLog.length > 0) {
         return {
@@ -46,4 +41,9 @@ export function checkNewExit(latestLog: ActivityLog[], latestCheckTime: number, 
         .filter(e => (e.date > latestCheckTime) && (e.date < boundaryTime));
 
     return newExitLog.length > 0;
+}
+
+interface CheckResult {
+    userNames: string[];
+    latestLogTime: number;
 }
