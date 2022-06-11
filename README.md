@@ -38,7 +38,7 @@ When installed globally,
 $ vn
 ```
 
-Or, run `vrchat-join-notifier.exe`.
+Or, run `$ npm run deploy` and `vrchat-join-notifier/vrchat-join-notifier.exe`.
 
 ### Options
 
