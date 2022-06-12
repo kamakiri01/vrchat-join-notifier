@@ -34,11 +34,8 @@ const defaultOscConfig: OscConfig = {
 
 export interface AppContext {
     config: AppConfig;
-    latestCheckTime: number;
-    latestCheckedInfo: {
-        join: string[];
-        leave: string[];
-    }
+    currentLogFilePath: string;
+    latestCheckIndex: number;
     userName: string | null;
 }
 
@@ -114,9 +111,9 @@ function wipeOldFiles() {
 function initContext(config: AppConfig): AppContext {
     return {
         config,
-        latestCheckTime: Date.now(),
-        latestCheckedInfo: { join: [], leave: [] },
-        userName: null
+        currentLogFilePath: "",
+        userName: null,
+        latestCheckIndex: 0
     }
 }
 
@@ -147,58 +144,48 @@ function loop(context: AppContext): void {
         const latestLog = getLatestLog();
         if (!latestLog) return;
 
-        const unNotifiedContent = checkUnNotifiedContent(context, latestLog);
+        if (latestLog.filePath !== context.currentLogFilePath) {
+            context.currentLogFilePath = latestLog.filePath;
+            context.latestCheckIndex = 0;
+        }
 
-        comsumeNewJoin(context, unNotifiedContent.join);
-        if (isNoNeedToNotifiyLeave(unNotifiedContent.isOwnExit, context.userName, unNotifiedContent.leave)) return;
-        consumeNewLeave(context, unNotifiedContent.leave);
+        const notifyInfo = getNotifyInfo(context, latestLog.log);
+        context.latestCheckIndex = latestLog.log.length - 1;
+
+        comsumeNewJoin(context, notifyInfo.join.userNames);
+        if (isNoNeedToNotifiyLeave(notifyInfo.isOwnExit, context.userName, notifyInfo.leave.userNames)) return;
+        consumeNewLeave(context, notifyInfo.leave.userNames);
     } catch (error) {
         if (!context.config.verbose) return;
         console.log("ERR", error);
     }
 }
 
-function checkUnNotifiedContent(context: AppContext, latestLog: ActivityLog[]) {
+function getNotifyInfo(context: AppContext, latestLog: ActivityLog[]) {
     if (!context.userName) context.userName = findOwnUserName(latestLog);
 
-    // NOTE: ログファイルの書き込みと読み込みタイミングがバッティングした場合、最新ログを取りこぼすケースが考えられる
-    // notifierが取得するログの範囲を最新時刻より手前までの範囲に制限し、バッティングによる取りこぼしを抑制する
-    // boundaryTimeより後のログはnotifierに届かないため、latestCheckTimeがboundaryTimeを追い越すことは無い
-    const boundaryTime = Date.now() - 500; // バッティング回避マージンとして0.5sec確保する
-
     const checkJoinResult = (context.config.notificationTypes.indexOf("join") !== -1) ?
-        checkNewJoin(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
+        checkNewJoin(latestLog, context.latestCheckIndex) : { userNames: [] };
     const checkLeaveResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
-        checkNewLeave(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
-    const isOwnExit = checkNewExit(latestLog, context.latestCheckTime, boundaryTime);
-
-    // NOTE: 同時刻のログ行が時間差でログファイルに書き込まれた場合、後から書き込まれたログは latestCheckTime でフィルタされてしまうケースが考えられる
-    // この取りこぼしを防ぐため、 latestCheckTime と同じログが後から読み込まれた場合には、未通知の内容であれば通知処理に送る
-    // latestCheckTime が更新される都度、未通知/既通知リストをリセットする
-    const tmpTime = context.latestCheckTime;
-    context.latestCheckTime = Math.max(context.latestCheckTime, checkJoinResult.latestLogTime, checkLeaveResult.latestLogTime);
-    if (tmpTime !== context.latestCheckTime) context.latestCheckedInfo = { join: [], leave: [] };
-    
-    const unNofitiedJoinList = checkJoinResult.userNames.filter(e => !context.latestCheckedInfo.join.includes(e));
-    const unNofitiedLeaveList = checkLeaveResult.userNames.filter(e => !context.latestCheckedInfo.leave.includes(e));
-    context.latestCheckedInfo = {
-        join: Array.from(new Set(context.latestCheckedInfo.join.concat(checkJoinResult.userNames))),
-        leave: Array.from(new Set(context.latestCheckedInfo.leave.concat(checkLeaveResult.userNames)))
-    };
+        checkNewLeave(latestLog, context.latestCheckIndex) : { userNames: [] };
+    const isOwnExit = checkNewExit(latestLog, context.latestCheckIndex);
 
     return {
         isOwnExit,
-        join: unNofitiedJoinList,
-        leave: unNofitiedLeaveList
+        join: checkJoinResult,
+        leave: checkLeaveResult,
     };
 }
 
-function getLatestLog(): ActivityLog[] | null {
+function getLatestLog(): { log: ActivityLog[], filePath: string} | null {
     const filePath: string | null = findLatestVRChatLogFullPath();
     if (!filePath) return null; // 参照できるログファイルがない
 
-    return parseVRChatLog(
-        fs.readFileSync(path.resolve(filePath), "utf8"), false);
+    return {
+        filePath,
+        log: parseVRChatLog(
+            fs.readFileSync(path.resolve(filePath), "utf8"), false)
+    };
 }
 
 // 自身の退室時か、leaveユーザ名リストに自身のdisplayNameが含まれる場合は通知しない
