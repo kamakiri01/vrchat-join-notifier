@@ -14,8 +14,8 @@ $ ./bin/run -t join
 コマンドライン上で利用する場合、Node.js が必要です。
 
 ```
-git clone git@github.com:kamakiri01/vrchat-join-notifier.git
-cd vrchat-join-notifier
+$ git clone git@github.com:kamakiri01/vrchat-join-notifier.git
+$ cd vrchat-join-notifier
 $ npm install
 $ npm run build
 ```
@@ -38,7 +38,7 @@ $ ./bin/run
 $ vn
 ```
 
-または、`vrchat-join-notifier.exe` を実行します。
+または、 `$ npm run deploy` を実行してから `vrchat-join-notifier/vrchat-join-notifier.exe` を実行します。
 
 ### Options
 
