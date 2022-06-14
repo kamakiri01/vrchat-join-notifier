@@ -9,8 +9,8 @@ export function findOwnUserName(latestLog: ActivityLog[]): string | null {
 
 export function checkNewJoin(latestLog: ActivityLog[], latestCheckIndex: number): CheckResult {
     const newJoinLog = latestLog
-        .filter(e => e.activityType === ActivityType.Join)
-        .filter((e, index) => (index >= latestCheckIndex));
+        .filter((e, index) => (index > latestCheckIndex)) // latestCheckIndex の基準を揃えるため、 index を使う filter は最初に行う
+        .filter(e => e.activityType === ActivityType.Join);
 
     if (newJoinLog.length > 0) {
         return {
@@ -22,8 +22,8 @@ export function checkNewJoin(latestLog: ActivityLog[], latestCheckIndex: number)
 
 export function checkNewLeave(latestLog: ActivityLog[], latestCheckIndex: number): CheckResult {
     const newLeaveLog = latestLog
-        .filter(e => e.activityType === ActivityType.Leave)
-        .filter((e, index) => (index >= latestCheckIndex));
+        .filter((e, index) => (index > latestCheckIndex))
+        .filter(e => e.activityType === ActivityType.Leave);
     if (newLeaveLog.length > 0) {
         return {
             userNames: newLeaveLog.map(e => (<MoveActivityLog>e).userData.userName)
@@ -34,8 +34,8 @@ export function checkNewLeave(latestLog: ActivityLog[], latestCheckIndex: number
 
 export function checkNewExit(latestLog: ActivityLog[], latestCheckIndex: number): boolean {
     const newExitLog = latestLog
-        .filter(e => e.activityType === ActivityType.Exit)
-        .filter((e, index) => (index >= latestCheckIndex));
+        .filter((e, index) => (index > latestCheckIndex))
+        .filter(e => e.activityType === ActivityType.Exit);
 
     return newExitLog.length > 0;
 }

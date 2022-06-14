@@ -4,12 +4,12 @@ import * as os from "os";
 import { parse } from "jsonc-parser";
 import { AppParameterObject } from "../types/AppConfig";
 
-export function generateFormulatedTime(): string {
+export function generateFormulatedTime(date: number): string {
     const dateOption: Intl.DateTimeFormatOptions = {
         year: "numeric", month: "2-digit", day: "2-digit",
         hour: "2-digit", minute: "2-digit", second: "2-digit"
     };
-    return (new Date()).toLocaleString(undefined, dateOption);
+    return (new Date(date)).toLocaleString(undefined, dateOption);
 }
 
 export function readConfigFile(configFilePath: string): AppParameterObject {
