@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
-import { AppContext } from "./app";
-import { showNotification } from "./notifier/notifier";
-import { sendJoinOsc } from "./osc/sender";
+import { AppContext } from "../app";
+import { showNotification } from "../notifier/notifier";
+import { sendJoinOsc } from "../osc/sender";
 
 export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
     if (userNames.length === 0) return;
