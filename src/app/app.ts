@@ -6,8 +6,8 @@ import { checkNewExit, checkNewJoin, checkNewLeave, findOwnUserName } from "./ut
 import { comsumeNewJoin, consumeNewLeave } from "./util/consumer";
 import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
 import { initTmpDir } from "./util/util";
-import * as appUpdater from "./util/appUpdater";
-import { launchUpdatedApp } from "./util/launchNewProcess";
+import * as appUpdater from "./update/appUpdater";
+import { launchUpdatedApp } from "./update/launchNewProcess";
 import { ContextManager } from "./contextHandler/ContextManager";
 
 const defaultAppConfig: AppConfig = {
