@@ -84,6 +84,7 @@ class Logger {
         this.writer = undefined!;
     }
 }
+/*
 
 export const LogSpaceType = {
     Notifier: "notifier", // join/leave通知
@@ -99,3 +100,5 @@ Object.keys(LogSpaceType).forEach(key => {
     logger[key] = namespaceLogger.get(key);
 })
 logger[LogSpaceType.Notifier].log("START!");
+
+*/

@@ -136,7 +136,7 @@ function loop(manager: ContextManager) {
     const filePath: string | null = findLatestVRChatLogFullPath();
     if (filePath && !manager.handlers[filePath]) {
         const log = getLog(filePath);
-        const isShouldMonitor = !!log && log.length > 0 && !isSuspendedLog(log); // 空のログか終了済みログは監視しない
+        const isShouldMonitor = !!log && log.length > 0 && !isSuspendedLog(filePath); // 空のログか終了済みログは監視しない
         if (isShouldMonitor) {
             const context = initContext(manager.config, filePath, log);
             if (context.config.verbose) showNewLogNotification(manager.config, path.basename(context.logFilePath));
@@ -167,7 +167,7 @@ function handlerLoop(context: AppContext): void | boolean {
         comsumeNewJoin(context, notificationInfo.join.userNames);
         if (isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames)) return;
         consumeNewLeave(context, notificationInfo.leave.userNames);
-        const isSuspended = isSuspendedLog(latestLog);
+        const isSuspended = isSuspendedLog(context.logFilePath);
         if (isSuspended) {
             const stat = fs.statSync(context.logFilePath);
             if (context.config.verbose) showSuspendLogNotification(context.config, path.basename(context.logFilePath), stat.birthtimeMs, stat.mtimeMs);
@@ -209,9 +209,9 @@ function isNoNeedToNotifiyLeave(isOwnExit: boolean, userName: string | null, lea
 /**
  * 更新されていないログかどうか
  */
-function isSuspendedLog(log: ActivityLog[]) {
+function isSuspendedLog(filePath: string) {
     const SUSPEND_BORDER_TIME = 60 * 60 * 1000; // 1時間更新が無い場合停止とみなす
-    if (!log || log.length === 0) return false;
-    const tailLogDate = log[log.length - 1].date;
-    if (Date.now() - tailLogDate > SUSPEND_BORDER_TIME) return true;
+    const mtime = fs.statSync(filePath).mtime;
+    if ((Date.now() - mtime.getTime()) > SUSPEND_BORDER_TIME) return true;
+    return false;
 }
