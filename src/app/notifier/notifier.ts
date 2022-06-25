@@ -1,5 +1,6 @@
 import { AppConfig } from "../types/AppConfig";
 import { pickXSOverlayParameter } from "../util/configPicker";
+import { logger } from "../util/logger";
 import { generateFormulatedTime } from "../util/util";
 import { showToast, ToastAudioType } from "./toast";
 import { showXSOverlayNotification } from "./xsoverlayNotification";
@@ -20,6 +21,7 @@ export function showNotification(label: string, userNames: string[], isSpecific:
 }
 
 export function showInitNotification(config: AppConfig): void {
+    logger
     const message = "running";
     const title = "VRChat Join Notifier";
     if (config.notificationTypes.length > 0) console.log(`notificationTypes: ${config.notificationTypes.join(" ")}`);
