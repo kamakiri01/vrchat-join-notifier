@@ -1,16 +1,16 @@
-import * as readline from "readline";
-
 process.stdin.setRawMode(true);
 process.stdin.resume();
 process.stdin.setEncoding("utf8");
 let count = 0;
-process.stdin.on("data", function( key ){
-    if (key.toString() === "\u0003") { // Ctrl-c
+process.stdin.on("data", function(key){
+    const codePoint = key.toString();
+    if (codePoint === "\u0003") { // Ctrl-c
         process.stdin.setRawMode(false);
         process.exit();
     }
 
-    if (key.toString() === "\u0020") { // space
+    //NOTE: 多言語のspaceキー入力を網羅するべき？
+    if (codePoint === "\u0020" || codePoint === "\u3000") { // Space or Idepgraphic Space
         namespaceLogger.use(Object.values(LogSpaceType)[count]);
         count = (count+1) % 2;
     }
@@ -31,7 +31,7 @@ class NamespaceLogger {
      */
     get(name: string): Logger {
         if (!name) name = "";
-        if (!this.loggers[name]) this.loggers[name] = new Logger({ writer: this.write.bind(this) });
+        if (!this.loggers[name]) this.loggers[name] = new Logger({ writer: (data) => { this.write.bind(this)(name, data) } });
         return this.loggers[name];
     }
 
@@ -40,7 +40,7 @@ class NamespaceLogger {
      * ロガーが変更された場合、 Console 描画のリセットを試みる。
      */
     use(name: string): Logger {
-        if (!name || !this.loggers[name]) this.get(name);
+        if (!this.loggers[name]) this.get(name);
         const currentLogger = this.loggers[name];
         if (this.currentName !== name) {
             this.clear();
@@ -68,8 +68,8 @@ class NamespaceLogger {
         console.log(logger.archive);
     }
 
-    private write(data: string) {
-        console.log(data);
+    private write(name: string, data: string) {
+        if (this.currentName === name) console.log(data);
     }
 }
 
@@ -101,13 +101,14 @@ class Logger {
     }
 }
 
-const namespaceLogger = new NamespaceLogger();
-
 export const LogSpaceType = {
     Notifier: "notifier", // join/leave通知
     VideoInfo: "videoInfo", // ビデオプレイヤーログ
 } as const;
 export type LogSpaceType = typeof LogSpaceType[keyof typeof LogSpaceType];
+
+const namespaceLogger = new NamespaceLogger();
+namespaceLogger.use(LogSpaceType.Notifier);
 
 export type ExportLogger = {[key in LogSpaceType]: Logger};
 
