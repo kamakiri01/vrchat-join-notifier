@@ -1,3 +1,22 @@
+import * as readline from "readline";
+
+process.stdin.setRawMode(true);
+process.stdin.resume();
+process.stdin.setEncoding("utf8");
+let count = 0;
+process.stdin.on("data", function( key ){
+    if (key.toString() === "\u0003") { // Ctrl-c
+        process.stdin.setRawMode(false);
+        process.exit();
+    }
+
+    if (key.toString() === "\u0020") { // space
+        namespaceLogger.use(Object.values(LogSpaceType)[count]);
+        count = (count+1) % 2;
+    }
+});
+
+
 class NamespaceLogger {
     private loggers: {[key: string]: Logger};
     private currentName!: string;
@@ -64,7 +83,8 @@ class Logger {
      */
     archive: string;
 
-    writer: (data: string) => void;
+    private writer: (data: string) => void;
+
     constructor(param: LoggerParameterObject) {
         this.archive = "";
         this.writer = param.writer;
@@ -75,15 +95,13 @@ class Logger {
         this.archive += `${this.archive.length === 0 ? "" : "\n"}${data}`;
     }
 
-    wipe(): void {
-        this.archive = "";
-    }
-
     destroy(): void {
         this.archive = "";
         this.writer = undefined!;
     }
 }
+
+const namespaceLogger = new NamespaceLogger();
 
 export const LogSpaceType = {
     Notifier: "notifier", // join/leave通知
@@ -91,10 +109,14 @@ export const LogSpaceType = {
 } as const;
 export type LogSpaceType = typeof LogSpaceType[keyof typeof LogSpaceType];
 
-export const logger: {[key: string]: Logger} = {};
+export type ExportLogger = {[key in LogSpaceType]: Logger};
 
-export const namespaceLogger = new NamespaceLogger();
-
-Object.values(LogSpaceType).forEach(key => {
-    logger[key] = namespaceLogger.get(key);
-})
+export const logger: ExportLogger =
+    Object.values(LogSpaceType).reduce(
+        (acc, key) => {
+            return {
+                ...acc,
+                [key]: namespaceLogger.get(key)
+            }
+        }, {} as ExportLogger
+);

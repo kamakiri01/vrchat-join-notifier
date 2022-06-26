@@ -2,8 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewExit, checkNewJoin, checkNewLeave, findOwnUserName } from "./util/checker";
-import { comsumeNewJoin, consumeNewLeave } from "./util/consumer";
+import { checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
+import { comsumeNewJoin, consumeNewLeave, consumeVideo } from "./util/consumer";
 import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
 import { initTmpDir } from "./util/util";
 import * as appUpdater from "./update/appUpdater";
@@ -165,8 +165,11 @@ function handlerLoop(context: AppContext): void | boolean {
         context.latestCheckIndex = latestLog.length - 1;
 
         comsumeNewJoin(context, notificationInfo.join.userNames);
-        if (isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames)) return;
-        consumeNewLeave(context, notificationInfo.leave.userNames);
+        if (!isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames))
+            consumeNewLeave(context, notificationInfo.leave.userNames);
+
+        consumeVideo(context, notificationInfo.video.urls);
+
         const isSuspended = isSuspendedLog(context.logFilePath);
         if (isSuspended) {
             const stat = fs.statSync(context.logFilePath);
@@ -183,16 +186,18 @@ function handlerLoop(context: AppContext): void | boolean {
 function getNotificationInfo(context: AppContext, latestLog: ActivityLog[]) {
     if (!context.userName) context.userName = findOwnUserName(latestLog);
 
-    const checkJoinResult = (context.config.notificationTypes.indexOf("join") !== -1) ?
+    const joinResult = (context.config.notificationTypes.indexOf("join") !== -1) ?
         checkNewJoin(latestLog, context.latestCheckIndex) : { userNames: [] };
-    const checkLeaveResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
+    const leaveResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
         checkNewLeave(latestLog, context.latestCheckIndex) : { userNames: [] };
     const isOwnExit = checkNewExit(latestLog, context.latestCheckIndex);
+    const videoResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex);
 
     return {
         isOwnExit,
-        join: checkJoinResult,
-        leave: checkLeaveResult,
+        join: joinResult,
+        leave: leaveResult,
+        video: videoResult
     };
 }
 

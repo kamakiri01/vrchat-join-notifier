@@ -13,6 +13,7 @@ export class ContextManager {
     }
 
     add(id: string, func: HandlerFunction) {
+        console.log("add id:" + id, this.handlers[id]); // TODO: for debug
         if (this.handlers[id]) return;
         this.handlers[id] = func;
     }
@@ -25,7 +26,7 @@ export class ContextManager {
     }
 
     remove(id: string) {
-        console.log("remove id:" + id, this.handlers[id]);
+        console.log("remove id:" + id, this.handlers[id]); // TODO: for debug
         if (!this.handlers[id]) return;
         this.handlers[id] = undefined!;
         delete this.handlers[id];

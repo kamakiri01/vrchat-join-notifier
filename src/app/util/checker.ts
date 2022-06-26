@@ -1,4 +1,4 @@
-import { ActivityLog, ActivityType, AuthenticationActivityLog, MoveActivityLog } from "vrchat-activity-viewer";
+import { ActivityLog, ActivityType, AuthenticationActivityLog, MoveActivityLog, SDK2PlayerStartedActivityLog, USharpVideoStartedActivityLog, VideoPlayActivityLog } from "vrchat-activity-viewer";
 
 export function findOwnUserName(latestLog: ActivityLog[]): string | null {
     const userName =
@@ -7,7 +7,7 @@ export function findOwnUserName(latestLog: ActivityLog[]): string | null {
     return userName || null;
 }
 
-export function checkNewJoin(latestLog: ActivityLog[], latestCheckIndex: number): CheckResult {
+export function checkNewJoin(latestLog: ActivityLog[], latestCheckIndex: number): CheckMoveResult {
     const newJoinLog = latestLog
         .filter((_, index) => (index > latestCheckIndex)) // latestCheckIndex の基準を揃えるため、 index を使う filter は最初に行う
         .filter(e => e.activityType === ActivityType.Join);
@@ -20,7 +20,7 @@ export function checkNewJoin(latestLog: ActivityLog[], latestCheckIndex: number)
     return { userNames: [] };
 }
 
-export function checkNewLeave(latestLog: ActivityLog[], latestCheckIndex: number): CheckResult {
+export function checkNewLeave(latestLog: ActivityLog[], latestCheckIndex: number): CheckMoveResult {
     const newLeaveLog = latestLog
         .filter((_, index) => (index > latestCheckIndex))
         .filter(e => e.activityType === ActivityType.Leave);
@@ -40,6 +40,24 @@ export function checkNewExit(latestLog: ActivityLog[], latestCheckIndex: number)
     return newExitLog.length > 0;
 }
 
-interface CheckResult {
+export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: number) {
+    const videoTypes = [ActivityType.SDK2PlayerStarted, ActivityType.USharpVideoStarted, ActivityType.VideoPlay];
+    const newVideoLog = latestLog
+        .filter((_, index) => (index > latestCheckIndex))
+        .filter(isVideoType);
+    if (newVideoLog.length > 0) {
+        return {
+            urls: newVideoLog.map(e => e.url)
+        }
+    }
+    return { urls: [] };
+}
+
+function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | USharpVideoStartedActivityLog | SDK2PlayerStartedActivityLog {
+    const videoTypes: ActivityType[] = [ActivityType.SDK2PlayerStarted, ActivityType.USharpVideoStarted, ActivityType.VideoPlay];
+    return videoTypes.includes(log.activityType);
+}
+
+interface CheckMoveResult {
     userNames: string[];
 }
