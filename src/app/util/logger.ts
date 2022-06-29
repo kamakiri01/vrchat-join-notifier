@@ -1,7 +1,7 @@
 process.stdin.setRawMode(true);
 process.stdin.resume();
 process.stdin.setEncoding("utf8");
-let count = 0;
+let viewIndex = 0;
 process.stdin.on("data", function(key){
     const codePoint = key.toString();
     if (codePoint === "\u0003") { // Ctrl-c
@@ -11,11 +11,10 @@ process.stdin.on("data", function(key){
 
     //NOTE: 多言語のspaceキー入力を網羅するべき？
     if (codePoint === "\u0020" || codePoint === "\u3000") { // Space or Idepgraphic Space
-        namespaceLogger.use(Object.values(LogSpaceType)[count]);
-        count = (count+1) % 2;
+        namespaceLogger.use(Object.values(LogSpaceType)[viewIndex]);
+        viewIndex = (viewIndex + 1) % Object.values(LogSpaceType).length;
     }
 });
-
 
 class NamespaceLogger {
     private loggers: {[key: string]: Logger};

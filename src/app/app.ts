@@ -100,6 +100,7 @@ function wipeOldFiles() {
     })
 
     // NOTE: nexe環境ではfsモジュールが仮想化されているため、fs.readdirSync()を使用してexecPathディレクトリのファイル一覧を取得することができない
+    // そのため.oldファイルをファイル一覧から見つけることができない
     // vrchat-join-notifier.exeはアップデートの内容に関わらず常に存在するため、特別扱いして常にチェックする
     // TODO: nexe/pkg/その他の実行ファイルの仮想fsからreaddirSyncできる方法を検討する
     const oldExecPath = path.join(currentAppDir, "vrchat-join-notifier.exe.old");

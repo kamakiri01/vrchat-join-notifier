@@ -1,4 +1,6 @@
 import { AppConfig } from "../types/AppConfig";
+import { logger } from "../util/logger";
+import { generateFormulatedTime } from "../util/util";
 
 export interface ContextManagerParameterObject {
     config: AppConfig;
@@ -13,7 +15,10 @@ export class ContextManager {
     }
 
     add(id: string, func: HandlerFunction) {
-        console.log("add id:" + id, this.handlers[id]); // TODO: for debug
+        if(this.config.verbose) {
+            const time = generateFormulatedTime(Date.now());
+            logger.notifier.log(`${time} add log name: ${id}`);
+        }
         if (this.handlers[id]) return;
         this.handlers[id] = func;
     }
@@ -26,7 +31,10 @@ export class ContextManager {
     }
 
     remove(id: string) {
-        console.log("remove id:" + id, this.handlers[id]); // TODO: for debug
+        if(this.config.verbose) {
+            const time = generateFormulatedTime(Date.now());
+            logger.notifier.log(`remove log name: ${id}`);
+        }
         if (!this.handlers[id]) return;
         this.handlers[id] = undefined!;
         delete this.handlers[id];
