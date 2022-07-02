@@ -1,22 +1,45 @@
-process.stdin.setRawMode(true);
-process.stdin.resume();
-process.stdin.setEncoding("utf8");
-let viewIndex = 0;
-process.stdin.on("data", function(key){
-    const codePoint = key.toString();
-    if (codePoint === "\u0003") { // Ctrl-c
-        process.stdin.setRawMode(false);
-        process.exit();
-    }
+function initStdinMode() {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding("utf8");
 
-    //NOTE: 多言語のspaceキー入力を網羅するべき？
-    if (codePoint === "\u0020" || codePoint === "\u3000") { // Space or Idepgraphic Space
-        namespaceLogger.use(Object.values(LogSpaceType)[viewIndex]);
-        viewIndex = (viewIndex + 1) % Object.values(LogSpaceType).length;
-    }
-});
+    let viewIndex = 0;
+    process.stdin.on("data", function(key) {
+        const codePoint = key.toString();
+        if (codePoint === "\u0003") { // Ctrl-c
+            resetStdinMode();
+            process.exit();
+        }
 
-class NamespaceLogger {
+        //NOTE: 多言語のspaceキー入力を網羅するべき？
+        if (codePoint === "\u0020" || codePoint === "\u3000") { // Space or Idepgraphic Space
+            namespaceLogger.use(Object.values(LogSpaceType)[viewIndex]);
+            viewIndex = (viewIndex + 1) % Object.values(LogSpaceType).length;
+        }
+    });
+
+    process.on("exit", code => {
+        resetStdinMode();
+        process.exit(code);
+    });
+
+    process.on("SIGINT", () => {
+        resetStdinMode();
+        process.exit(0);
+    })
+}
+
+function resetStdinMode() {
+    process.stdin.setRawMode(false);
+}
+
+export interface NamespaceLoggerLike {
+    get(name: string): Logger;
+    use(name: string): Logger;
+    destroy(name: string): void;
+}
+
+class NamespaceLogger implements NamespaceLoggerLike {
     private loggers: {[key: string]: Logger};
     private currentName!: string;
 
@@ -43,6 +66,7 @@ class NamespaceLogger {
         const currentLogger = this.loggers[name];
         if (this.currentName !== name) {
             this.clear();
+            this.showHeader(name);
             this.restore(currentLogger);
             this.currentName = name;
         }
@@ -106,11 +130,11 @@ export const LogSpaceType = {
 } as const;
 export type LogSpaceType = typeof LogSpaceType[keyof typeof LogSpaceType];
 
+initStdinMode();
 const namespaceLogger = new NamespaceLogger();
 namespaceLogger.use(LogSpaceType.Notifier);
 
 export type ExportLogger = {[key in LogSpaceType]: Logger};
-
 export const logger: ExportLogger =
     Object.values(LogSpaceType).reduce(
         (acc, key) => {

@@ -142,7 +142,7 @@ function loop(manager: ContextManager) {
             const context = initContext(manager.config, filePath, log);
             if (context.config.verbose) showNewLogNotification(manager.config, path.basename(context.logFilePath));
             manager.add(filePath, () => handlerLoop(context));
-        };
+        }
     }
     manager.fire();
 }
