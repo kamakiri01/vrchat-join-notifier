@@ -1,3 +1,5 @@
+import { setInterval } from "timers";
+
 function initStdinMode() {
     process.stdin.setRawMode(true);
     process.stdin.resume();
@@ -13,8 +15,8 @@ function initStdinMode() {
 
         //NOTE: 多言語のspaceキー入力を網羅するべき？
         if (codePoint === "\u0020" || codePoint === "\u3000") { // Space or Idepgraphic Space
-            namespaceLogger.use(Object.values(LogSpaceType)[viewIndex]);
             viewIndex = (viewIndex + 1) % Object.values(LogSpaceType).length;
+            namespaceLogger.use(Object.values(LogSpaceType)[viewIndex]);
         }
     });
 
@@ -45,6 +47,9 @@ class NamespaceLogger implements NamespaceLoggerLike {
 
     constructor() {
         this.loggers = {};
+        const interval = setInterval(() => { // ウインドウリサイズによってshowHeaderの描画幅がずれてしまう問題への対処
+            this.rewrite();
+        }, 1000);
     }
 
     /**
@@ -63,14 +68,12 @@ class NamespaceLogger implements NamespaceLoggerLike {
      */
     use(name: string): Logger {
         if (!this.loggers[name]) this.get(name);
-        const currentLogger = this.loggers[name];
+        const newLogger = this.loggers[name];
         if (this.currentName !== name) {
-            this.clear();
-            this.showHeader(name);
-            this.restore(currentLogger);
             this.currentName = name;
+            this.rewrite();
         }
-        return currentLogger;
+        return newLogger;
     }
 
     /**
@@ -88,11 +91,26 @@ class NamespaceLogger implements NamespaceLoggerLike {
     }
 
     private restore(logger: Logger) {
-        console.log(logger.archive);
+        if (logger.archive.length > 0) console.log(logger.archive);
     }
 
     private write(name: string, data: string) {
         if (this.currentName === name) console.log(data);
+    }
+
+    private rewrite() {
+        this.clear();
+        this.showHeader();
+        if (this.currentName) this.restore(this.loggers[this.currentName]);
+    }
+
+    private showHeader() {
+        const headlerText = Object.values(LogSpaceType).map((spaceName) => {
+            if (spaceName === this.currentName) return spaceName;
+            return `\u001B[100m${spaceName}\x1b[0m`; // 灰色背景+黒文字
+        }).join(" ");
+        const padding = " ".repeat(process.stdout.columns - 1 - Object.values(LogSpaceType).reduce((acc: number, key) => acc + 1 + key.length, 0)) + "";
+        console.log(headlerText.concat(`\u001B[100m${padding}\x1b[0m`));
     }
 }
 
@@ -115,7 +133,7 @@ class Logger {
 
     log(data: string): void {
         this.writer(data);
-        this.archive += `${this.archive.length === 0 ? "" : "\n"}${data}`;
+        this.archive += `${data}\n`;
     }
 
     destroy(): void {
@@ -126,7 +144,9 @@ class Logger {
 
 export const LogSpaceType = {
     Notifier: "notifier", // join/leave通知
-    VideoInfo: "videoInfo", // ビデオプレイヤーログ
+    VideoLog: "videoLog", // ビデオプレイヤーログ
+    test1: "test1",
+    test2: "test2"
 } as const;
 export type LogSpaceType = typeof LogSpaceType[keyof typeof LogSpaceType];
 

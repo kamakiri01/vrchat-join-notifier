@@ -33,7 +33,7 @@ export class ContextManager {
     remove(id: string) {
         if(this.config.verbose) {
             const time = generateFormulatedTime(Date.now());
-            logger.notifier.log(`remove log name: ${id}`);
+            logger.notifier.log(`${time} remove log name: ${id}`);
         }
         if (!this.handlers[id]) return;
         this.handlers[id] = undefined!;

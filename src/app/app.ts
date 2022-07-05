@@ -9,6 +9,7 @@ import { initTmpDir } from "./util/util";
 import * as appUpdater from "./update/appUpdater";
 import { launchUpdatedApp } from "./update/launchNewProcess";
 import { ContextManager } from "./contextHandler/ContextManager";
+import { logger } from "./util/logger";
 
 const defaultAppConfig: AppConfig = {
     interval: "2",
@@ -128,7 +129,7 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
 
     // TODO: notificationTypes が増えたら type を切る
     if (config.notificationTypes.filter((e: string) => {return e !== "join" && e !== "leave";}).length > 0) {
-        console.log("unknown config [notificationTypes] found, " + config.notificationTypes);
+        logger.notifier.log("unknown config [notificationTypes] found, " + config.notificationTypes);
     }
     return config;
 }

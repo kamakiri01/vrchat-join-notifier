@@ -26,7 +26,7 @@ export function consumeNewLeave(context: AppContext, userNames: string[]): void 
 export function consumeVideo(context: AppContext, urls: string[]): void {
     if (urls.length == 0) return;
     const time = generateFormulatedTime(Date.now());
-    urls.forEach(url => logger.videoInfo.log(`${time} ${url}`));
+    urls.forEach(url => logger.videoLog.log(`${time} ${url}`));
 }
 
 function isIncludeSpecificNames(names: string[], specificNames: string[]): boolean {
