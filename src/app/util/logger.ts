@@ -105,12 +105,21 @@ class NamespaceLogger implements NamespaceLoggerLike {
     }
 
     private showHeader() {
-        const headlerText = Object.values(LogSpaceType).map((spaceName) => {
-            if (spaceName === this.currentName) return spaceName;
-            return `\u001B[100m${spaceName}\x1b[0m`; // 灰色背景+黒文字
-        }).join(" ");
+        let currentSpaceIndex = 0;
+        const headlerText = Object.values(LogSpaceType)
+            .map((spaceName, i) => {
+                if (this.currentName === spaceName) currentSpaceIndex = i;
+                return spaceName;
+            })
+            .map((spaceName, i) => {
+                const isSpace = spaceName === this.currentName;
+                const itemString =
+                    (isSpace ? spaceName : `\u001B[100m${spaceName}\u001b[49m`) +
+                    ((isSpace || (i+1 === currentSpaceIndex)) ? " " : `\u001B[100m \u001b[49m`);
+                return itemString;
+            }).join("");
         const padding = " ".repeat(process.stdout.columns - 1 - Object.values(LogSpaceType).reduce((acc: number, key) => acc + 1 + key.length, 0)) + "";
-        console.log(headlerText.concat(`\u001B[100m${padding}\x1b[0m`));
+        console.log("\u001b[4m" + headlerText + "\u001b[24m" + `\u001B[100m${padding}\u001b[49m` + "\gsx1b[0m");
     }
 }
 
