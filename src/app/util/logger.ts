@@ -206,8 +206,6 @@ class Logger {
 export const LogSpaceType = {
     Notifier: "notifier", // join/leave通知
     VideoLog: "videoLog", // ビデオプレイヤーログ
-    test1: "test1",
-    test2: "test2"
 } as const;
 export type LogSpaceType = typeof LogSpaceType[keyof typeof LogSpaceType];
 
