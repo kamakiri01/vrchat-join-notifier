@@ -1,7 +1,12 @@
 import { setInterval } from "timers";
+import { execSync } from "child_process";
+
+function isTTYEnable(): boolean {
+    return process.stdin.isTTY && !!process.stdin.setRawMode;
+}
 
 function initStdinMode() {
-    process.stdin.setRawMode(true);
+    if (process.stdin.isTTY) process.stdin.setRawMode(true);
     process.stdin.resume();
     process.stdin.setEncoding("utf8");
 
@@ -13,11 +18,15 @@ function initStdinMode() {
             process.exit();
         }
 
-        //NOTE: 多言語のspaceキー入力を網羅するべき？
+        //NOTE: 多言語のspace相当のキー入力を網羅するべき？
         if (codePoint === "\u0020" || codePoint === "\u3000") { // Space or Idepgraphic Space
             viewIndex = (viewIndex + 1) % Object.values(LogSpaceType).length;
             namespaceLogger.use(Object.values(LogSpaceType)[viewIndex]);
         }
+    });
+
+    process.on("uncaughtException", (error) => {
+        logger.notifier.log(JSON.stringify(error, Object.getOwnPropertyNames(error)));
     });
 
     process.on("exit", code => {
@@ -32,7 +41,7 @@ function initStdinMode() {
 }
 
 function resetStdinMode() {
-    process.stdin.setRawMode(false);
+    if (process.stdin.isTTY) process.stdin.setRawMode(false);
 }
 
 export interface NamespaceLoggerLike {
@@ -47,9 +56,11 @@ class NamespaceLogger implements NamespaceLoggerLike {
 
     constructor() {
         this.loggers = {};
+        /*
         const interval = setInterval(() => { // ウインドウリサイズによってshowHeaderの描画幅がずれてしまう問題への対処
             this.rewrite();
         }, 1000);
+        */
     }
 
     /**
@@ -88,6 +99,21 @@ class NamespaceLogger implements NamespaceLoggerLike {
 
     private clear() {
         console.clear();
+        try {
+            console.log("\x1BC") // \033c
+            console.log("\x1B[EJ") // \033[2J
+            if (process.platform === "win32" && process.stdin.isTTY) { // コマンドプロンプトや、Windows Terminalで開いたGit Bashのbash.exe
+                execSync('cls', {stdio: 'inherit'});
+            } else if (process.platform === "win32") { // git-bash.exe
+                const stdout = execSync('clear', {stdio: 'inherit'});
+                console.log(stdout);
+            } else {
+                console.log("\x1B[EJ"); // \033[2J
+            }
+        } catch (error) {
+            logger.notifier.log(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+            throw error;
+        }
     }
 
     private restore(logger: Logger) {
@@ -100,10 +126,13 @@ class NamespaceLogger implements NamespaceLoggerLike {
 
     private rewrite() {
         this.clear();
-        this.showHeader();
+        // this.showHeader();
         if (this.currentName) this.restore(this.loggers[this.currentName]);
     }
 
+    /**
+     * NOTE: write() の記述行数が増えるとターミナルにヘッダを表示できなくなり、スクロールを使いづらくなるため、通常時はヘッダを使用しない
+     */
     private showHeader() {
         let currentSpaceIndex = 0;
         const headlerText = Object.values(LogSpaceType)
@@ -118,9 +147,30 @@ class NamespaceLogger implements NamespaceLoggerLike {
                     ((isSpace || (i+1 === currentSpaceIndex)) ? " " : `\u001B[100m \u001b[49m`);
                 return itemString;
             }).join("");
-        const padding = " ".repeat(process.stdout.columns - 1 - Object.values(LogSpaceType).reduce((acc: number, key) => acc + 1 + key.length, 0)) + "";
-        console.log("\u001b[4m" + headlerText + "\u001b[24m" + `\u001B[100m${padding}\u001b[49m` + "\gsx1b[0m");
+        const padding = " ".repeat((process.stdout.columns - 1 - Object.values(LogSpaceType).reduce((acc: number, key) => acc + 1 + key.length, 0))) + "";
+        console.log("\u001b[4m" + headlerText + "\u001b[24m" + `\u001B[100m${padding}\u001b[49m` + "\x1b[0m\n");
     }
+}
+
+class FallbackNamespaceLogger implements NamespaceLoggerLike {
+    private logger!: Logger;
+    constructor() {
+        this.logger = new Logger({ writer: (data) => { this.write.bind(this)("__fallback__", data) } });
+    }
+    get(name: string): Logger {
+        return this.logger;
+    }
+    use(name: string): Logger {
+        return this.logger;
+    }
+    destroy(name: string): void {
+        // do nothing
+    }
+
+    private write(name: string, data: string) {
+        if (name === LogSpaceType.Notifier) console.log(data); // フォールバックではUIを提供できないため従来のnotifier通知のみを出力する
+    }
+
 }
 
 interface LoggerParameterObject {
@@ -141,8 +191,10 @@ class Logger {
     }
 
     log(data: string): void {
-        this.writer(data);
-        this.archive += `${data}\n`;
+        data.split("\n").forEach(line => {
+            this.writer(line);
+            this.archive += `${line}\n`;
+        })
     }
 
     destroy(): void {
@@ -159,17 +211,27 @@ export const LogSpaceType = {
 } as const;
 export type LogSpaceType = typeof LogSpaceType[keyof typeof LogSpaceType];
 
-initStdinMode();
-const namespaceLogger = new NamespaceLogger();
-namespaceLogger.use(LogSpaceType.Notifier);
-
+let namespaceLogger!: NamespaceLoggerLike;
 export type ExportLogger = {[key in LogSpaceType]: Logger};
-export const logger: ExportLogger =
-    Object.values(LogSpaceType).reduce(
+export let logger!: ExportLogger;
+
+function initLogger() {
+    if (isTTYEnable()) {
+        initStdinMode();
+        namespaceLogger = new NamespaceLogger();
+    } else {
+        namespaceLogger = new FallbackNamespaceLogger();
+    }
+
+    logger = Object.values(LogSpaceType).reduce(
         (acc, key) => {
             return {
                 ...acc,
                 [key]: namespaceLogger.get(key)
             }
         }, {} as ExportLogger
-);
+    );
+    namespaceLogger.use(LogSpaceType.Notifier);
+}
+
+initLogger();
