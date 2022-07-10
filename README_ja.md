@@ -1,6 +1,6 @@
 # VRChat Join Notifier
 
-VRChat を起動中、同じインスタンスへの join/leave を通知する node.js コマンドラインツールです。
+VRChat を起動中、同じインスタンスへの join/leave を通知する Node.js コマンドラインツールです。
 windows 向け単体実行ファイルを Release しています。
 
 ## Usage
