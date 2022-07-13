@@ -22,7 +22,7 @@
     "release:web-update": "npm run release:web-update:json && npm run release:web-update:zip",
     "release:web-update:json": "cpx text/app/latest.json public/",
     "release:web-update:zip": "powershell compress-archive vrchat-join-notifier/vrchat-join-notifier.exe public/latest.zip -Force",
-    "update:yt-dlp": ""
+    "update:yt-dlp": "node scripts/update/updateYtDlp.js"
   },
   "bin": {
     "vn": "bin/run"
