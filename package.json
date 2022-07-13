@@ -21,7 +21,8 @@
     "release": "npm run release:web-update",
     "release:web-update": "npm run release:web-update:json && npm run release:web-update:zip",
     "release:web-update:json": "cpx text/app/latest.json public/",
-    "release:web-update:zip": "powershell compress-archive vrchat-join-notifier/vrchat-join-notifier.exe public/latest.zip -Force"
+    "release:web-update:zip": "powershell compress-archive vrchat-join-notifier/vrchat-join-notifier.exe public/latest.zip -Force",
+    "update:yt-dlp": ""
   },
   "bin": {
     "vn": "bin/run"
@@ -33,6 +34,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^6.2.0",
+    "iconv-lite": "^0.6.3",
     "jsonc-parser": "^3.0.0",
     "node-fetch": "^2.6.6",
     "osc-min": "^1.1.2",
