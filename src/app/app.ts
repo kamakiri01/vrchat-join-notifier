@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
-import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
+import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog, DEFAULT_VRCHAT_FULL_PATH } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
 import { checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
 import { comsumeNewJoin, consumeNewLeave, consumeVideo } from "./util/consumer";

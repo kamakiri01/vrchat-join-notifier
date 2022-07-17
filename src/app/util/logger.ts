@@ -1,6 +1,6 @@
-import { setInterval } from "timers";
 import { execSync } from "child_process";
 
+// @see https://github.com/nodejs/node/issues/3006
 function isTTYEnable(): boolean {
     return process.stdin.isTTY && !!process.stdin.setRawMode;
 }
@@ -229,7 +229,6 @@ function initLogger() {
             }
         }, {} as ExportLogger
     );
-    namespaceLogger.use(LogSpaceType.Notifier);
-}
+    namespaceLogger.use(LogSpaceType.Notifier);}
 
 initLogger();

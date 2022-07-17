@@ -4,6 +4,7 @@ import { showNotification } from "../notifier/notifier";
 import { sendJoinOsc } from "../osc/sender";
 import { logger } from "./logger";
 import { generateFormulatedTime } from "./util";
+import { getVideoTitle } from "./videoUtil";
 
 export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
     if (userNames.length === 0) return;
@@ -26,7 +27,15 @@ export function consumeNewLeave(context: AppContext, userNames: string[]): void 
 export function consumeVideo(context: AppContext, urls: string[]): void {
     if (urls.length == 0) return;
     const time = generateFormulatedTime(Date.now());
-    urls.forEach(url => logger.videoLog.log(`${time} ${url}`));
+    urls.forEach(url => {
+        let title = "";
+        try {
+            title = getVideoTitle(url);
+        } catch (e) {
+            // do nothing
+        }
+        logger.videoLog.log(`${time} ${url} ${title}`);
+    });
 }
 
 function isIncludeSpecificNames(names: string[], specificNames: string[]): boolean {

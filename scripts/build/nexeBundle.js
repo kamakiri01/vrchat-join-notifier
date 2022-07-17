@@ -1,8 +1,9 @@
 const { compile } = require("nexe");
 
+console.log(process.argv[2])
 compile({
     input: "lib/winExeStandalone.js",
-    output: "vrchat-join-notifier/vrchat-join-notifier.exe",
+    output: process.argv[2],
     targets:  "12.18.2",
     resources: ["./thirdparty/yt-dlp/yt-dlp.exe"],
   });

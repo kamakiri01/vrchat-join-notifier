@@ -25,6 +25,7 @@ export function showInitNotification(config: AppConfig): void {
     const title = "VRChat Join Notifier";
     if (config.notificationTypes.length > 0) logger.notifier.log(`notificationTypes: ${config.notificationTypes.join(" ")}`);
     if (config.specificNames.length > 0) logger.notifier.log(`specificNames: ${config.specificNames.join(" ")}`);
+    logger.videoLog.log("video playlog");
     callNotificationUtil(config, message, title);
 }
 
