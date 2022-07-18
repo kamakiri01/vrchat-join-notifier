@@ -41,7 +41,6 @@ export function checkNewExit(latestLog: ActivityLog[], latestCheckIndex: number)
 }
 
 export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: number) {
-    const videoTypes = [ActivityType.SDK2PlayerStarted, ActivityType.USharpVideoStarted, ActivityType.VideoPlay];
     const newVideoLog = latestLog
         .filter((_, index) => (index > latestCheckIndex))
         .filter(isVideoType);
@@ -54,7 +53,7 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
 }
 
 function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | USharpVideoStartedActivityLog | SDK2PlayerStartedActivityLog {
-    const videoTypes: ActivityType[] = [ActivityType.SDK2PlayerStarted, ActivityType.USharpVideoStarted, ActivityType.VideoPlay];
+    const videoTypes: ActivityType[] = [ActivityType.SDK2PlayerStarted, ActivityType.VideoPlay];
     return videoTypes.includes(log.activityType);
 }
 

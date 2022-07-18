@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
+import { URL } from "url";
 import * as iconv from "iconv-lite";
 import { initTmpDir } from "./util";
 
@@ -17,7 +18,8 @@ let ytDlpExePath: string;
 function initExe() {
     try {
         const tmpDirPath = initTmpDir();
-        // NOTE: nexe環境ではfsモジュールが仮想化されているため、exeファイルはnexe compileのresourcesに含める必要がある。
+        // NOTE: nexe環境ではfsモジュールが仮想化されているため、yt-dlp.exeファイルはzipに同梱せず、nexe compileのresourcesに含めたうえで、
+        // 一時ディレクトリに展開する必要がある。
         // また、resourcesに含めたファイルはfs.exists()とreadFileSync()で確認と読み出しができるが、fs.access()でアクセスすることはできない。
         const exeFile = fs.readFileSync(YT_DLP_EXE_VIRTUAL_PATH);
         fs.writeFileSync(path.join(tmpDirPath, YT_DLP_EXE_FILENAME), exeFile);
@@ -27,9 +29,24 @@ function initExe() {
     }
 }
 
+function normalizeURL(url: string) {
+    const u = new URL(url);
+    if (isYouTube(url)) {
+        u.searchParams.forEach((_, key) => {
+            if (key === "v") return;
+            u.searchParams.delete(key);
+        });
+    }
+    return u.toString();
+}
+
+function isYouTube(host: string) {
+    return host.indexOf("youtu.be") || host.indexOf("youtube.com");
+}
+
 export function getVideoTitle(url: string): string {
     if (!ytDlpExePath) throw Error();
-    const buf = execSync(`${ytDlpExePath} ${url}`);
+    const buf = execSync(`${ytDlpExePath} ${normalizeURL(url)}`);
     return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
 }
 

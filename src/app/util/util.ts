@@ -21,6 +21,7 @@ export function readConfigFile(configFilePath: string): AppParameterObject {
     }
 }
 
+// NOTE: 複数個所で呼び出すと意図しないファイル削除を行うことがあるため、起動時に生成して以後はパスを返すべき
 export function initTmpDir(): string {
     const appTmpPath = path.join(os.tmpdir(), "VRChatJoinNotifier", "notifier");
     try {

@@ -1,6 +1,5 @@
 const { compile } = require("nexe");
 
-console.log(process.argv[2])
 compile({
     input: "lib/winExeStandalone.js",
     output: process.argv[2],
