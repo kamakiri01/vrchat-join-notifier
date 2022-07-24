@@ -5,6 +5,12 @@ import { URL } from "url";
 import * as iconv from "iconv-lite";
 import { initTmpDir } from "./util";
 
+export function getVideoTitle(url: string): string {
+    if (!ytDlpExePath) throw Error();
+    const buf = execSync(`${ytDlpExePath} ${normalizeURL(url)}`);
+    return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
+}
+
 const YT_DLP_EXE_FILENAME = "yt-dlp.exe";
 const YT_DLP_EXE_VIRTUAL_PATH = "./thirdparty/yt-dlp/" + YT_DLP_EXE_FILENAME;
 let ytDlpExePath: string;
@@ -42,12 +48,6 @@ function normalizeURL(url: string) {
 
 function isYouTube(host: string) {
     return host.indexOf("youtu.be") || host.indexOf("youtube.com");
-}
-
-export function getVideoTitle(url: string): string {
-    if (!ytDlpExePath) throw Error();
-    const buf = execSync(`${ytDlpExePath} ${normalizeURL(url)}`);
-    return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
 }
 
 initExe();
