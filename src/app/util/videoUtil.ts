@@ -37,17 +37,17 @@ function initExe() {
 
 function normalizeURL(url: string) {
     const u = new URL(url);
-    if (isYouTube(url)) {
+    if (isYouTube(u.host)) {
         u.searchParams.forEach((_, key) => {
             if (key === "v") return;
-            u.searchParams.delete(key);
+            u.searchParams.delete(key); // yt-dlpはv以外のパラメータがある場合パースしないので削除する
         });
     }
     return u.toString();
 }
 
 function isYouTube(host: string) {
-    return host.indexOf("youtu.be") || host.indexOf("youtube.com");
+    return host.includes("youtu.be") || host.includes("youtube.com");
 }
 
 initExe();
