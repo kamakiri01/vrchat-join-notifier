@@ -4,7 +4,7 @@ import { showNotification } from "../notifier/notifier";
 import { sendJoinOsc } from "../osc/sender";
 import { logger } from "./logger";
 import { generateFormulatedTime } from "./util";
-import { getVideoTitle } from "./videoUtil";
+import { getVideoTitle, normalizeUrl } from "./videoUtil";
 
 export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
     if (userNames.length === 0) return;
@@ -29,12 +29,13 @@ export function consumeVideo(context: AppContext, urls: string[]): void {
     const time = generateFormulatedTime(Date.now());
     urls.forEach(url => {
         let title = "";
+        const normalizedUrl = normalizeUrl(url);
         try {
-            title = getVideoTitle(url);
+            title = getVideoTitle(normalizedUrl);
         } catch (e) {
             // do nothing
         }
-        logger.videoLog.log(`${time} ${url} ${title}`);
+        logger.videoLog.log(`${time} ${normalizedUrl} ${title}`);
     });
 }
 

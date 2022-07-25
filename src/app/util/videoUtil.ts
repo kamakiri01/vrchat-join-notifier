@@ -7,8 +7,21 @@ import { initTmpDir } from "./util";
 
 export function getVideoTitle(url: string): string {
     if (!ytDlpExePath) throw Error();
-    const buf = execSync(`${ytDlpExePath} ${normalizeURL(url)}`);
+    const buf = execSync(`${ytDlpExePath} ${url}`);
     return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
+}
+
+export function normalizeUrl(url: string) {
+    const u = new URL(url);
+    if (isYouTube(u.host)) {
+        u.searchParams.forEach((_, key) => {
+            if (key === "v") return;
+            u.searchParams.delete(key); // yt-dlpはv以外のパラメータがある場合パースしないので削除する
+        });
+    } else if (isRedirect(u) && !!u.searchParams.get("url")) {
+        return new URL(u.searchParams.get("url")!).toString();
+    }
+    return u.toString();
 }
 
 const YT_DLP_EXE_FILENAME = "yt-dlp.exe";
@@ -35,19 +48,13 @@ function initExe() {
     }
 }
 
-function normalizeURL(url: string) {
-    const u = new URL(url);
-    if (isYouTube(u.host)) {
-        u.searchParams.forEach((_, key) => {
-            if (key === "v") return;
-            u.searchParams.delete(key); // yt-dlpはv以外のパラメータがある場合パースしないので削除する
-        });
-    }
-    return u.toString();
+function isYouTube(host: string): boolean {
+    return host.includes("youtu.be") || host.includes("youtube.com");
 }
 
-function isYouTube(host: string) {
-    return host.includes("youtu.be") || host.includes("youtube.com");
+function isRedirect(url: URL): boolean {
+    // カラオケワールドのリダイレクト対応。他のワールド対応も適時行う
+    return url.host.includes("vrckaraoke.0cm.org");
 }
 
 initExe();
