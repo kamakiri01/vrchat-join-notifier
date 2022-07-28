@@ -11,15 +11,21 @@ export function getVideoTitle(url: string): string {
     return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
 }
 
-export function normalizeUrl(url: string) {
+export function normalizeUrl(url: string): string {
     const u = new URL(url);
     if (isYouTube(u.host)) {
-        u.searchParams.forEach((_, key) => {
-            if (key === "v") return;
-            u.searchParams.delete(key); // yt-dlpはv以外のパラメータがある場合パースしないので削除する
+        const names: string[] = [];
+        u.searchParams.forEach((value, name) => {
+            names.push(name); // forEach内でsearchParamsをdeleteすると、ループが回らないnameが生じるため別配列に一時的に格納する
         });
-    } else if (isRedirect(u) && !!u.searchParams.get("url")) {
-        return new URL(u.searchParams.get("url")!).toString();
+        names.forEach((name) => {
+            if (name === "v") return;
+            u.searchParams.delete(name); // yt-dlpはv以外のパラメータがある場合パースしないので削除する
+        });
+    } else if (isRedirectKaraoke(u) && !!u.searchParams.get("url")) {
+        return normalizeUrl(new URL(u.searchParams.get("url")!).toString());
+    } else if (isRedirectJinnai(u) && !!u.searchParams.get("url")) {
+        return normalizeUrl(new URL(u.searchParams.get("url")!).toString());
     }
     return u.toString();
 }
@@ -52,9 +58,14 @@ function isYouTube(host: string): boolean {
     return host.includes("youtu.be") || host.includes("youtube.com");
 }
 
-function isRedirect(url: URL): boolean {
-    // カラオケワールドのリダイレクト対応。他のワールド対応も適時行う
+// カラオケワールドのリダイレクト対応
+function isRedirectKaraoke(url: URL): boolean {
     return url.host.includes("vrckaraoke.0cm.org");
+}
+
+// 陣内システムのリダイレクト対応
+function isRedirectJinnai(url: URL): boolean {
+    return url.host.includes("t-ne.x0.to");
 }
 
 initExe();
