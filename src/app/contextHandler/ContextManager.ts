@@ -15,10 +15,6 @@ export class ContextManager {
     }
 
     add(id: string, func: HandlerFunction) {
-        if(this.config.verbose) {
-            const time = generateFormulatedTime(Date.now());
-            logger.notifier.log(`${time} add log name: ${id}`);
-        }
         if (this.handlers[id]) return;
         this.handlers[id] = func;
     }
