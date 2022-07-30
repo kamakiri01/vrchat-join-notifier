@@ -52,8 +52,8 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
     return { urls: [] };
 }
 
-function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | USharpVideoStartedActivityLog | SDK2PlayerStartedActivityLog {
-    const videoTypes: ActivityType[] = [ActivityType.SDK2PlayerStarted, ActivityType.VideoPlay];
+function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | SDK2PlayerStartedActivityLog {
+    const videoTypes: ActivityType[] = [ActivityType.VideoPlay, ActivityType.SDK2PlayerStarted];
     return videoTypes.includes(log.activityType);
 }
 
