@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import * as fs from "fs";
 
 // @see https://github.com/nodejs/node/issues/3006
 function isTTYEnable(): boolean {

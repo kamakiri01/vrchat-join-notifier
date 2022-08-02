@@ -34,6 +34,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^6.2.0",
+    "find-process": "^1.4.7",
     "iconv-lite": "^0.6.3",
     "jsonc-parser": "^3.0.0",
     "node-fetch": "^2.6.6",

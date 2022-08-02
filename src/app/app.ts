@@ -5,11 +5,12 @@ import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
 import { checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
 import { comsumeNewJoin, consumeNewLeave, consumeVideo } from "./util/consumer";
 import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
-import { initTmpDir } from "./util/util";
+import { getTmpDir, initTmpDir } from "./util/util";
 import * as appUpdater from "./update/appUpdater";
 import { launchUpdatedApp } from "./update/launchNewProcess";
 import { ContextManager } from "./contextHandler/ContextManager";
 import { logger } from "./util/logger";
+import { initytDlpExe } from "./util/videoUtil";
 
 const defaultAppConfig: AppConfig = {
     interval: "2",
@@ -41,8 +42,9 @@ export interface AppContext {
     userName: string | null;
 }
 
-export function app(param: AppParameterObject): void {
+export async function app(param: AppParameterObject): Promise<void> {
     wipeOldFiles();
+    await initTmpDir();
 
     if (param.noCheckUpdate) {
         _app(param);
@@ -57,6 +59,7 @@ export function app(param: AppParameterObject): void {
 }
 
 function _app(param: AppParameterObject) {
+    initytDlpExe();
     const config = generateAppConfig(param);
     const interval = parseInt(config.interval, 10);
     const manager = new ContextManager({ config });
@@ -77,7 +80,7 @@ async function updateApp(): Promise<boolean> {
     if (canUpdate) console.log("New update found.");
     if (!canUpdate) return false;
 
-    const tmpDirPath = initTmpDir();
+    const tmpDirPath = getTmpDir();
     const successDownload = await appUpdater.downloadLatest(tmpDirPath);
     if (successDownload) console.log("Successful update download.");
     if (!successDownload) return false;

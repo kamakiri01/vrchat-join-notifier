@@ -3,7 +3,7 @@ import * as path from "path";
 import { execSync } from "child_process";
 import { URL } from "url";
 import * as iconv from "iconv-lite";
-import { initTmpDir } from "./util";
+import { getTmpDir } from "./util";
 
 export function getVideoTitle(url: string): string {
     if (!ytDlpExePath) throw Error();
@@ -30,19 +30,15 @@ export function normalizeUrl(url: string): string {
     return u.toString();
 }
 
-const YT_DLP_EXE_FILENAME = "yt-dlp.exe";
-const YT_DLP_EXE_VIRTUAL_PATH = "./thirdparty/yt-dlp/" + YT_DLP_EXE_FILENAME;
-let ytDlpExePath: string;
-
 /**
  * バンドルされた yt-dlp.exe を展開して利用可能にする。
  *
  * VRChat/Tools 以下にある yt-dlp.exe はカスタム版であり、 --print オプションを利用できない。
  * また、そのファイルパスが保持される保証もない。そのため、自前でバイナリをバンドルして抱える。
  */
-function initExe() {
+export function initytDlpExe() {
     try {
-        const tmpDirPath = initTmpDir();
+        const tmpDirPath = getTmpDir();
         // NOTE: nexe環境ではfsモジュールが仮想化されているため、yt-dlp.exeファイルはzipに同梱せず、nexe compileのresourcesに含めたうえで、
         // 一時ディレクトリに展開する必要がある。
         // また、resourcesに含めたファイルはfs.exists()とreadFileSync()で確認と読み出しができるが、fs.access()でアクセスすることはできない。
@@ -53,6 +49,10 @@ function initExe() {
         // do nothing
     }
 }
+
+const YT_DLP_EXE_FILENAME = "yt-dlp.exe";
+const YT_DLP_EXE_VIRTUAL_PATH = "./thirdparty/yt-dlp/" + YT_DLP_EXE_FILENAME;
+let ytDlpExePath: string;
 
 function isYouTube(host: string): boolean {
     return host.includes("youtu.be") || host.includes("youtube.com");
@@ -67,5 +67,3 @@ function isRedirectKaraoke(url: URL): boolean {
 function isRedirectJinnai(url: URL): boolean {
     return url.host.includes("t-ne.x0.to");
 }
-
-initExe();

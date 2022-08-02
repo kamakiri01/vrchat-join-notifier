@@ -3,6 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import { parse } from "jsonc-parser";
 import { AppParameterObject } from "../types/AppConfig";
+import find = require ("find-process")
 
 export function generateFormulatedTime(date: number): string {
     const dateOption: Intl.DateTimeFormatOptions = {
@@ -21,18 +22,57 @@ export function readConfigFile(configFilePath: string): AppParameterObject {
     }
 }
 
-// NOTE: 複数個所で呼び出すと意図しないファイル削除を行うことがあるため、起動時に生成して以後はパスを返すべき
-export function initTmpDir(): string {
-    const appTmpPath = path.join(os.tmpdir(), "VRChatJoinNotifier", "notifier");
-    try {
-        // fs.rmSync(appTmpPath, { recursive: true, force: true }); // over node14
-        fs.rmdirSync(appTmpPath, { recursive: true });
-        fs.mkdirSync(appTmpPath, { recursive: true });
-    } catch (_) {
-        // NOTE: 他の VRChatJoinNotifier が起動しているなどの理由で一時フォルダを削除できない場合がある
-        // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
-    }
-    const currentAppTmpPath = path.join(appTmpPath, (Date.now()).toString());
+export async function initTmpDir(): Promise<void> {
+    const appTmpDirPath = path.join(os.tmpdir(), "VRChatJoinNotifier", "notifier");
+    await deleteClosedTmpDirs(appTmpDirPath);
+
+    currentAppTmpPath = path.join(appTmpDirPath, (Date.now()).toString());
     fs.mkdirSync(currentAppTmpPath, { recursive: true });
+    writeLockfile();
+}
+
+export function getTmpDir(): string {
     return currentAppTmpPath;
+}
+
+let currentAppTmpPath: string;
+
+// 使用済みの一時フォルダを削除する
+async function deleteClosedTmpDirs(appTmpDirPath: string): Promise<void> {
+    const promises = fs.readdirSync(appTmpDirPath, { withFileTypes: true }).map(async (dirent) => {
+        if (!dirent.isDirectory()) return;
+    const targetAppTmpDirPath = path.join(appTmpDirPath, dirent.name);
+        const lockfilePath = path.join(targetAppTmpDirPath, "lockfile");
+        try {
+            fs.existsSync(lockfilePath);
+            const lockData = JSON.parse(fs.readFileSync(lockfilePath, "utf-8"));
+            if (lockData.pid) {
+                const processList = await find("pid", lockData.pid);
+                // プロセスが存在すれば、ロックファイルを作成したアプリが使用中。フォルダを削除しない
+                if (processList.length > 0) return;
+            }
+        } catch (error: any) {
+            // ロックファイルが無い、あるがパース出来ない、pidを読みだせない場合は異常系としてフォルダ削除を試みる
+        }
+        try {
+            fs.rmdirSync(targetAppTmpDirPath, { recursive: true });
+        } catch (error) {
+            // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
+        }
+
+    })
+    await Promise.all(promises);
+}
+
+// NOTE: 多重起動時に一時フォルダを削除して既存アプリを壊さないために、起動時にpidを書いたlockfileを作成する
+// 一時フォルダの削除はpidを持つプロセスがあるかで判定する
+// fs.open/createWriteStreamしているファイルはnode.jsではファイルロックできない（メモ帳などから上書きはできないがnode.jsから上書き・削除は可能）ため、
+// pidの有無を判定処理とする
+function writeLockfile() {
+    const lockfilePath = path.join(currentAppTmpPath, "lockfile");
+    fs.openSync(lockfilePath, "wx+");
+    fs.writeFileSync(lockfilePath, JSON.stringify({
+        pid: process.pid,
+        time: generateFormulatedTime(Date.now())
+    }));
 }
