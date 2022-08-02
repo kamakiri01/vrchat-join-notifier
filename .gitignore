@@ -2,7 +2,6 @@ node_modules
 lib
 package-lock.json
 db.json
-*.exe
 vrchat-join-notifier.zip
 vrchat-join-notifier/
 vrchat-join-notifier-for-launcher/

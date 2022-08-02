@@ -2,7 +2,7 @@
 
 # VRChat Join Notifier
 
-This is a node.js command line tool that notifies you of the names of users who have joined/leaved to the same instance of VRChat while it is running.
+This is a Node.js command line tool that notifies you of the names of users who have joined/leaved to the same instance of VRChat while it is running.
 A standalone executable for windows has been released.
 
 ## Usage
