@@ -3,7 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import { parse } from "jsonc-parser";
 import { AppParameterObject } from "../types/AppConfig";
-import find = require ("find-process")
+import find = require ("find-process");
 
 export function generateFormulatedTime(date: number): string {
     const dateOption: Intl.DateTimeFormatOptions = {
@@ -59,8 +59,7 @@ async function deleteClosedTmpDirs(appTmpDirPath: string): Promise<void> {
         } catch (error) {
             // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
         }
-
-    })
+    });
     await Promise.all(promises);
 }
 
@@ -73,6 +72,6 @@ function writeLockfile() {
     fs.openSync(lockfilePath, "wx+");
     fs.writeFileSync(lockfilePath, JSON.stringify({
         pid: process.pid,
-        time: generateFormulatedTime(Date.now())
+        time: Date.now()
     }));
 }
