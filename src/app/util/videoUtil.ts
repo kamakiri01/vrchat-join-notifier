@@ -26,6 +26,8 @@ export function normalizeUrl(url: string): string {
         return normalizeUrl(new URL(u.searchParams.get("url")!).toString());
     } else if (isRedirectJinnai(u) && !!u.searchParams.get("url")) {
         return normalizeUrl(new URL(u.searchParams.get("url")!).toString());
+    } else if (isRedirectJinnaiNext(u) && !!u.searchParams.get("url")) {
+        return normalizeUrl(new URL(u.searchParams.get("url")!).toString());
     }
     return u.toString();
 }
@@ -66,4 +68,8 @@ function isRedirectKaraoke(url: URL): boolean {
 // 陣内システムのリダイレクト対応
 function isRedirectJinnai(url: URL): boolean {
     return url.host.includes("t-ne.x0.to");
+}
+
+function isRedirectJinnaiNext(url: URL): boolean {
+    return url.host.includes("nextnex.com");
 }
