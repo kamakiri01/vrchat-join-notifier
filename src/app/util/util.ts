@@ -37,7 +37,11 @@ export function getTmpDir(): string {
 
 let currentAppTmpPath: string;
 
-// 使用済みの一時フォルダを削除する
+/**
+ *
+ * 使用済みの一時フォルダを削除する
+ * 多重起動した場合の挙動を壊さないために、使用中の一時フォルダは削除しない
+ */
 async function deleteClosedTmpDirs(appTmpDirPath: string): Promise<void> {
     const promises = fs.readdirSync(appTmpDirPath, { withFileTypes: true }).map(async (dirent) => {
         if (!dirent.isDirectory()) return;
@@ -48,7 +52,7 @@ async function deleteClosedTmpDirs(appTmpDirPath: string): Promise<void> {
             const lockData = JSON.parse(fs.readFileSync(lockfilePath, "utf-8"));
             if (lockData.pid) {
                 const processList = await find("pid", lockData.pid);
-                // プロセスが存在すれば、ロックファイルを作成したアプリが使用中。フォルダを削除しない
+                // プロセスが存在すれば、ロックファイルを作成したアプリが使用中。よってフォルダを削除しない
                 if (processList.length > 0) return;
             }
         } catch (error: any) {
