@@ -31,7 +31,7 @@ export function consumeVideo(context: AppContext, urls: string[]): void {
         let title = "";
         const normalizedUrl = normalizeUrl(url);
         try {
-            title = getVideoTitle(normalizedUrl);
+            title = getVideoTitle(normalizedUrl, context.config.verbose);
         } catch (e) {
             // do nothing
         }

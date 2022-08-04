@@ -5,9 +5,13 @@ import { URL } from "url";
 import * as iconv from "iconv-lite";
 import { getTmpDir } from "./util";
 
-export function getVideoTitle(url: string): string {
+export function getVideoTitle(url: string, verbose: boolean): string {
     if (!ytDlpExePath) throw Error();
-    const buf = execSync(`${ytDlpExePath} ${url}`);
+    // NOTE: 動画ファイル直リンクはyt-dlp.exe自身の出力でWARNINGを出す場合があるため、普段は非表示オプションを付ける
+    // Falling back on generic information extractor.
+    // URL could be a direct video link, returning it as such.
+    const cliOption = " --skip-download --print title" + (verbose ? "" : " --no-warnings");
+    const buf = execSync(`${ytDlpExePath} ${cliOption} ${url}`);
     return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
 }
 
@@ -46,7 +50,7 @@ export function initytDlpExe() {
         // また、resourcesに含めたファイルはfs.exists()とreadFileSync()で確認と読み出しができるが、fs.access()でアクセスすることはできない。
         const exeFile = fs.readFileSync(YT_DLP_EXE_VIRTUAL_PATH);
         fs.writeFileSync(path.join(tmpDirPath, YT_DLP_EXE_FILENAME), exeFile);
-        ytDlpExePath = `${path.join(tmpDirPath, YT_DLP_EXE_FILENAME)} --skip-download --print title`;
+        ytDlpExePath = `${path.join(tmpDirPath, YT_DLP_EXE_FILENAME)}`;
     } catch (e) {
         // do nothing
     }
