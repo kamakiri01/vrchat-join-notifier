@@ -169,8 +169,8 @@ function getLatestLog(): ActivityLog[] | null {
     const filePath: string | null = findLatestVRChatLogFullPath();
     if (!filePath) return null; // 参照できるログファイルがない
 
-    return parseVRChatLog(
-        fs.readFileSync(path.resolve(filePath), "utf8"), false);
+    const log = parseVRChatLog(fs.readFileSync(path.resolve(filePath), "utf8"), false);
+    return log ? log.activityLogList : null;
 }
 
 // 自身の退室時か、leaveユーザ名リストに自身のdisplayNameが含まれる場合は通知しない
