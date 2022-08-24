@@ -14,7 +14,7 @@ export function checkNewJoin(latestLog: ActivityLog[], latestCheckIndex: number)
 
     if (newJoinLog.length > 0) {
         return {
-            userNames: newJoinLog.map(e => (<MoveActivityLog>e).userData.userName)
+            userNames: Array.from(new Set(newJoinLog.map(e => (<MoveActivityLog>e).userData.userName)))
         }
     }
     return { userNames: [] };
@@ -26,7 +26,7 @@ export function checkNewLeave(latestLog: ActivityLog[], latestCheckIndex: number
         .filter(e => e.activityType === ActivityType.Leave);
     if (newLeaveLog.length > 0) {
         return {
-            userNames: newLeaveLog.map(e => (<MoveActivityLog>e).userData.userName)
+            userNames: Array.from(new Set(newLeaveLog.map(e => (<MoveActivityLog>e).userData.userName)))
         }
     }
     return { userNames: [] };
@@ -46,7 +46,7 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
         .filter(isVideoType);
     if (newVideoLog.length > 0) {
         return {
-            urls: newVideoLog.map(e => e.url)
+            urls: Array.from(new Set(newVideoLog.map(e => e.url))) // 同じvideoログを複数出力するワールドがあるため重複をなくす
         }
     }
     return { urls: [] };

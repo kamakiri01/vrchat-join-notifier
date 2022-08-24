@@ -169,11 +169,14 @@ function handlerLoop(context: AppContext): void | boolean {
         const notificationInfo = getNotificationInfo(context, latestLog);
         context.latestCheckIndex = latestLog.length - 1;
 
-        comsumeNewJoin(context, notificationInfo.join.userNames);
-        if (!isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames))
-            consumeNewLeave(context, notificationInfo.leave.userNames);
-
-        consumeVideo(context, notificationInfo.video.urls);
+        // consumeに時間がかかる場合handlerLoopにかかる時間が伸びるため、handlerLoopの処理が完了しないまま次のhandlerLoopが開始してしまうことがある
+        // これを防ぐため時間のかかるconsumeはasyncで行う
+        (async () => {
+            comsumeNewJoin(context, notificationInfo.join.userNames);
+            if (!isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames))
+                consumeNewLeave(context, notificationInfo.leave.userNames);
+            consumeVideo(context, notificationInfo.video.urls);
+        })();
 
         const isSuspended = isSuspendedLog(context.logFilePath);
         if (isSuspended) {
