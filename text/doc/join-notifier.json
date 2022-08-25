@@ -8,7 +8,8 @@
     /**
      * 通知内容を指定します。 "join" "leave" のいずれか、または両方を指定できます。
      * Specify the notification type. You can specify either "join", "leave", or both.
-     * example: ["join", "leave"]
+     * example(notify join and leave): ["join", "leave"]
+     * example(notify nothing): []
      */
     "notificationTypes": ["join"],
 
@@ -20,14 +21,14 @@
     "specificNames": [],
 
     /**
-     * specificNamesで指定したユーザ名を通知したとき、実行するコマンドを指定します。
+     * specificNamesで指定したユーザ名をjoin通知したとき、実行するコマンドを指定します。
      * Specifies the command to be executed when the user name specified by specificNames is notified.
      * example: "echo ${{names}}" -> $ echo myFriendName1 myFriendName2
      */
     "specificExec": null,
 
     /**
-     * 任意のユーザ名を通知したとき、実行するコマンドを指定します。
+     * 任意のユーザ名をjoin通知したとき、実行するコマンドを指定します。
      * Specifies the command to be executed when  user name is notified.
      * example: "echo ${{names}}" -> $ echo myFriendName1 myFriendName2
      */

@@ -2,12 +2,15 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
-import { checkNewExit, checkNewJoin, checkNewLeave, CheckResult, findOwnUserName } from "./updater";
-import { comsumeNewJoin, consumeNewLeave } from "./consumer";
-import { showInitNotification } from "./notifier/notifier";
-import { initTmpDir } from "./util/util";
-import * as appUpdater from "./util/appUpdater";
-import { launchUpdatedApp } from "./util/launchNewProcess";
+import { checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
+import { comsumeNewJoin, consumeNewLeave, consumeVideo } from "./util/consumer";
+import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
+import { getTmpDir, initTmpDir } from "./util/util";
+import * as appUpdater from "./update/appUpdater";
+import { launchUpdatedApp } from "./update/launchNewProcess";
+import { ContextManager } from "./contextHandler/ContextManager";
+import { logger } from "./util/logger";
+import { initytDlpExe } from "./util/videoUtil";
 
 const defaultAppConfig: AppConfig = {
     interval: "2",
@@ -34,12 +37,14 @@ const defaultOscConfig: OscConfig = {
 
 export interface AppContext {
     config: AppConfig;
-    latestCheckTime: number;
+    logFilePath: string;
+    latestCheckIndex: number;
     userName: string | null;
 }
 
-export function app(param: AppParameterObject): void {
+export async function app(param: AppParameterObject): Promise<void> {
     wipeOldFiles();
+    await initTmpDir();
 
     if (param.noCheckUpdate) {
         _app(param);
@@ -54,12 +59,14 @@ export function app(param: AppParameterObject): void {
 }
 
 function _app(param: AppParameterObject) {
+    initytDlpExe();
     const config = generateAppConfig(param);
-    const interval = parseInt(config.interval, 10)
-    const context = initContext(config);
+    const interval = parseInt(config.interval, 10);
+    const manager = new ContextManager({ config });
+
     showInitNotification(config);
     setInterval(() => {
-        loop(context);
+        loop(manager);
     }, interval * 1000);
 }
 
@@ -73,7 +80,7 @@ async function updateApp(): Promise<boolean> {
     if (canUpdate) console.log("New update found.");
     if (!canUpdate) return false;
 
-    const tmpDirPath = initTmpDir();
+    const tmpDirPath = getTmpDir();
     const successDownload = await appUpdater.downloadLatest(tmpDirPath);
     if (successDownload) console.log("Successful update download.");
     if (!successDownload) return false;
@@ -97,6 +104,7 @@ function wipeOldFiles() {
     })
 
     // NOTE: nexe環境ではfsモジュールが仮想化されているため、fs.readdirSync()を使用してexecPathディレクトリのファイル一覧を取得することができない
+    // そのため.oldファイルをファイル一覧から見つけることができない
     // vrchat-join-notifier.exeはアップデートの内容に関わらず常に存在するため、特別扱いして常にチェックする
     // TODO: nexe/pkg/その他の実行ファイルの仮想fsからreaddirSyncできる方法を検討する
     const oldExecPath = path.join(currentAppDir, "vrchat-join-notifier.exe.old");
@@ -104,14 +112,6 @@ function wipeOldFiles() {
         fs.unlinkSync(oldExecPath);
     } catch (error: any) {
         // アップデートによって再起動された場合のみ.oldファイルが存在するため、正常系でもこのパスに到達する
-    }
-}
-
-function initContext(config: AppConfig): AppContext {
-    return {
-        config,
-        latestCheckTime: Date.now(),
-        userName: null
     }
 }
 
@@ -132,48 +132,99 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
 
     // TODO: notificationTypes が増えたら type を切る
     if (config.notificationTypes.filter((e: string) => {return e !== "join" && e !== "leave";}).length > 0) {
-        console.log("unknown config [notificationTypes] found, " + config.notificationTypes);
+        logger.notifier.log("unknown config [notificationTypes] found, " + config.notificationTypes);
     }
     return config;
 }
 
-function loop(context: AppContext): void {
-    try {
-        const latestLog = getLatestLog();
-        if (!latestLog) return;
+function loop(manager: ContextManager) {
+    const filePath: string | null = findLatestVRChatLogFullPath();
+    if (filePath && !manager.handlers[filePath]) {
+        const log = getLog(filePath);
+        const isShouldMonitor = !!log && log.length > 0 && !isSuspendedLog(filePath); // 空のログか終了済みログは監視しない
+        if (isShouldMonitor) {
+            const context = initContext(manager.config, filePath, log);
+            if (context.config.verbose) showNewLogNotification(manager.config, path.basename(context.logFilePath));
+            manager.add(filePath, () => handlerLoop(context));
+        }
+    }
+    manager.fire();
+}
 
-        if (!context.userName) context.userName = findOwnUserName(latestLog);
-
-        // NOTE: ログファイルの書き込みと読み込みタイミングがバッティングした場合、最新ログを取りこぼすケースが考えられる
-        // notifierが取得するログの範囲を最新時刻より手前までの範囲に制限し、バッティングによる取りこぼしを抑制する
-        // boundaryTimeより後のログはnotifierに届かないため、latestCheckTimeがboundaryTimeを追い越すことは無い
-        const boundaryTime = Date.now() - 500; // バッティング回避マージンとして0.5sec確保する
-
-        const checkJoinResult: CheckResult =(context.config.notificationTypes.indexOf("join") !== -1) ?
-            checkNewJoin(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
-        const checkLeaveResult: CheckResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
-            checkNewLeave(latestLog, context.latestCheckTime, boundaryTime) : { userNames: [], latestLogTime: 0 };
-        const isOwnExit = checkNewExit(latestLog, context.latestCheckTime, boundaryTime);
-
-        context.latestCheckTime = Math.max(context.latestCheckTime, checkJoinResult.latestLogTime, checkLeaveResult.latestLogTime);
-        comsumeNewJoin(context, checkJoinResult);
-        if (isNoNeedToNotifiyLeave(isOwnExit, context.userName, checkLeaveResult.userNames)) return;
-        consumeNewLeave(context, checkLeaveResult);
-    } catch (error) {
-        if (!context.config.verbose) return;
-        console.log("ERR", error);
+function initContext(config: AppConfig, logFilePath: string, log: ActivityLog[]): AppContext {
+    const latestCheckIndex = log ? log.length - 1 : 0;
+    return {
+        config,
+        logFilePath,
+        userName: null,
+        latestCheckIndex
     }
 }
 
-function getLatestLog(): ActivityLog[] | null {
-    const filePath: string | null = findLatestVRChatLogFullPath();
-    if (!filePath) return null; // 参照できるログファイルがない
+function handlerLoop(context: AppContext): void | boolean {
+    try {
+        const latestLog = getLog(context.logFilePath);
+        if (!latestLog) return;
 
-    const log = parseVRChatLog(fs.readFileSync(path.resolve(filePath), "utf8"), false);
-    return log ? log.activityLogList : null;
+        const notificationInfo = getNotificationInfo(context, latestLog);
+        context.latestCheckIndex = latestLog.length - 1;
+
+        // consumeに時間がかかる場合handlerLoopにかかる時間が伸びるため、handlerLoopの処理が完了しないまま次のhandlerLoopが開始してしまうことがある
+        // これを防ぐため時間のかかるconsumeはasyncで行う
+        (async () => {
+            comsumeNewJoin(context, notificationInfo.join.userNames);
+            if (!isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames))
+                consumeNewLeave(context, notificationInfo.leave.userNames);
+            consumeVideo(context, notificationInfo.video.urls);
+        })();
+
+        const isSuspended = isSuspendedLog(context.logFilePath);
+        if (isSuspended) {
+            const stat = fs.statSync(context.logFilePath);
+            if (context.config.verbose) showSuspendLogNotification(context.config, path.basename(context.logFilePath), stat.birthtimeMs, stat.mtimeMs);
+            return isSuspended;
+        }
+    } catch (error) {
+        if (!context.config.verbose) return;
+        console.log("ERR", error);
+        return true;
+    }
+}
+
+function getNotificationInfo(context: AppContext, latestLog: ActivityLog[]) {
+    if (!context.userName) context.userName = findOwnUserName(latestLog);
+
+    const joinResult = (context.config.notificationTypes.indexOf("join") !== -1) ?
+        checkNewJoin(latestLog, context.latestCheckIndex) : { userNames: [] };
+    const leaveResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
+        checkNewLeave(latestLog, context.latestCheckIndex) : { userNames: [] };
+    const isOwnExit = checkNewExit(latestLog, context.latestCheckIndex);
+    const videoResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex);
+
+    return {
+        isOwnExit,
+        join: joinResult,
+        leave: leaveResult,
+        video: videoResult
+    };
+}
+
+function getLog(filePath: string): ActivityLog[] | null {
+    return parseVRChatLog(
+        fs.readFileSync(path.resolve(filePath), "utf8"), false);
 }
 
 // 自身の退室時か、leaveユーザ名リストに自身のdisplayNameが含まれる場合は通知しない
 function isNoNeedToNotifiyLeave(isOwnExit: boolean, userName: string | null, leaveUserNames: string[]): boolean {
     return isOwnExit || (!!userName && leaveUserNames.indexOf(userName) !== -1);
+}
+
+/**
+ * 更新されていないログかどうか
+ */
+function isSuspendedLog(filePath: string) {
+    const SUSPEND_BORDER_TIME = 60 * 60 * 1000; // 1時間更新が無い場合停止とみなす
+    const mtime = fs.statSync(filePath).mtime;
+    if ((Date.now() - mtime.getTime()) > SUSPEND_BORDER_TIME) return true;
+    return false;
 }

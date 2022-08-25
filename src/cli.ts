@@ -63,5 +63,5 @@ export async function run(argv: any): Promise<void> {
         config.noCheckUpdate =     true;
     }
 
-    app(config);
+    await app(config);
 }
