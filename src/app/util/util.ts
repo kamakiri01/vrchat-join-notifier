@@ -43,9 +43,15 @@ let currentAppTmpPath: string;
  * 多重起動した場合の挙動を壊さないために、使用中の一時フォルダは削除しない
  */
 async function deleteClosedTmpDirs(appTmpDirPath: string): Promise<void> {
-    const promises = fs.readdirSync(appTmpDirPath, { withFileTypes: true }).map(async (dirent) => {
+    let dirs: fs.Dirent[];
+    try {
+        dirs = fs.readdirSync(appTmpDirPath, { withFileTypes: true });
+    } catch (error: any) {
+        return; // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
+    }
+    const promises = dirs.map(async (dirent) => {
         if (!dirent.isDirectory()) return;
-    const targetAppTmpDirPath = path.join(appTmpDirPath, dirent.name);
+        const targetAppTmpDirPath = path.join(appTmpDirPath, dirent.name);
         const lockfilePath = path.join(targetAppTmpDirPath, "lockfile");
         try {
             fs.existsSync(lockfilePath);
