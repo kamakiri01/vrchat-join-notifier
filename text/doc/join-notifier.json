@@ -82,7 +82,7 @@
       */
     "launcher": {
         /**
-         * 起動時のウインドウの状態を指定します。
+         * 【有料版のみ】起動時のウインドウの状態を指定します。
          * Specifies the state of the window at startup.
          * 
          * "normal": 通常のウインドウ
