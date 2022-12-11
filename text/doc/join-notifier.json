@@ -76,6 +76,23 @@
      */
      "noCheckUpdate": false,
 
+     /**
+      * 【有料版のみ】有料版向け設定
+      *
+      */
+    "launcher": {
+        /**
+         * 【有料版のみ】起動時のウインドウの状態を指定します。
+         * Specifies the state of the window at startup.
+         * 
+         * "normal": 通常のウインドウ
+         * "minimized": 最小化
+         * "hidden": トレイアイコンに格納（アイコンメニューからウインドウを表示できます） Store in tray icon (you can display window from icon menu)
+         * 
+         */
+        "startStyle": "normal"
+    },
+
     /**
      * OSC 設定
      * reference: https://docs.vrchat.com/docs/osc-overview
