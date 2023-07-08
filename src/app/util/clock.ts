@@ -38,8 +38,5 @@ function getMoonPhaseFromDate(date: Date): number {
     let moonphase = (((year - 2009) % 19) * 11 + month + day);
     if (month < 3) moonphase += 2;
     moonphase = moonphase % 30;
-    console.log("sendClockOsc",
-        `moonphase: ${moonphase}, hourCoef = ${date.getHours()}/23 = ${hourCoef}, send: ${Math.min(moonphase, 30) + hourCoef}/30 = ${(Math.min(moonphase, 30) + hourCoef)/30}`
-    );
     return Math.min(moonphase, 30) + hourCoef;
 }
