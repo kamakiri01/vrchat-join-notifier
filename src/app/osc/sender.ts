@@ -18,6 +18,10 @@ let client: OscClient;
  let notifingCountGeneral = 0;
  let notifingCountSpecific = 0;
 
+ export function createClient(host: string, port: number) {
+    client = new OscClient(host, port);
+}
+
 function parseOscConfig(config: OscConfig): ParsedOscConfig {
     return {
         senderIp: config.senderIp,
@@ -30,7 +34,6 @@ function parseOscConfig(config: OscConfig): ParsedOscConfig {
 
 export function sendJoinOsc(config: OscConfig): void {
     const conf = parseOscConfig(config);
-    if (!client) createClient(conf.senderIp, conf.inPort);
 
     // NOTE: Bundleを検討する余地がある。但し、VRChatのOSCがBundleを正常に処理するかは実装依存である
     // @see https://github.com/vrchat/osccore/tree/all-in-one
@@ -50,7 +53,7 @@ export function sendJoinOsc(config: OscConfig): void {
         });
 }
 
-function sendOsc(address: string, value: Argument): Promise<void> {
+export function sendOsc(address: string, value: Argument): Promise<void> {
     return new Promise((resolve, reject) => {
         const message = new Message(address);
         message.append(value);
@@ -59,10 +62,6 @@ function sendOsc(address: string, value: Argument): Promise<void> {
           resolve();
         });
     })
-}
-
-function createClient(host: string, port: number) {
-    client = new OscClient(host, port);
 }
 
 const sleep = (msec: number) => new Promise(resolve => setTimeout(resolve, msec));

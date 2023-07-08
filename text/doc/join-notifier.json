@@ -65,6 +65,13 @@
     "xsoverlayTimeout": "3.0",
 
     /**
+     * OSCで日時と時刻を送信します。 (true or false)
+     * Send time using osc. (true or false)
+     */
+     "sendTime": true,
+
+
+    /**
      * 【無料版のみ】アプリケーションの自動更新を無効にします。 (true or false)
      * [free version only] Disable auto-update. (true or false)
      */
