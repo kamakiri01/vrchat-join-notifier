@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
-import { AppConfig, AppParameterObject, OscConfig } from "./types/AppConfig";
+import { AppConfig, AppParameterObject, NotificationTypes, OscConfig } from "./types/AppConfig";
 import { checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
 import { comsumeNewJoin, consumeNewLeave, consumeVideo } from "./util/consumer";
 import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
@@ -11,6 +11,8 @@ import { launchUpdatedApp } from "./update/launchNewProcess";
 import { ContextManager } from "./contextHandler/ContextManager";
 import { logger } from "./util/logger";
 import { initytDlpExe } from "./util/videoUtil";
+import { sendClockOsc } from "./util/clock";
+import { createClient } from "./osc/sender";
 
 const defaultAppConfig: AppConfig = {
     interval: "2",
@@ -23,6 +25,7 @@ const defaultAppConfig: AppConfig = {
     xsoverlayVolume: "0.5",
     xsoverlayOpacity: "1.0",
     xsoverlayTimeout: "3.0",
+    sendTime: true,
     verbose: false,
     noUpdate: false,
     noCheckUpdate: false
@@ -64,6 +67,11 @@ function _app(param: AppParameterObject) {
     const interval = parseInt(config.interval, 10);
     const manager = new ContextManager({ config });
 
+    if (config.osc) {
+        createClient(config.osc.senderIp, parseInt(config.osc.inPort));
+        if (config.sendTime) setOSCClockSender();
+    }
+    
     showInitNotification(config);
     setInterval(() => {
         loop(manager);
@@ -121,7 +129,7 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
         if (param[key] != null) config[key] = param[key];
     })
 
-    if (param.osc && (param.osc.generalJoinAddress || param.osc.specificJoinAddress)) {
+    if (param.osc && (param.osc.generalJoinAddress || param.osc.specificJoinAddress || param.sendTime)) {
         config.osc = JSON.parse(JSON.stringify(defaultOscConfig));
         (Object.keys(param.osc) as (keyof OscConfig)[]).forEach(key => {
             if (param.osc![key] != null) config.osc[key] = param.osc![key];
@@ -130,8 +138,7 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
         config.osc = undefined;
     }
 
-    // TODO: notificationTypes が増えたら type を切る
-    if (config.notificationTypes.filter((e: string) => {return e !== "join" && e !== "leave";}).length > 0) {
+    if (config.notificationTypes.filter((e: string) => {return !(Object.values(NotificationTypes) as string[]).includes(e)}).length > 0) {
         logger.notifier.log("unknown config [notificationTypes] found, " + config.notificationTypes);
     }
     return config;
@@ -228,4 +235,13 @@ function isSuspendedLog(filePath: string) {
     const mtime = fs.statSync(filePath).mtime;
     if ((Date.now() - mtime.getTime()) > SUSPEND_BORDER_TIME) return true;
     return false;
+}
+
+function setOSCClockSender() {
+    setInterval(() => {
+        // Playable sync はリモートには10/sec以上では伝達しない
+        // @see https://creators.vrchat.com/avatars/animator-parameters/#sync-types
+        const date = new Date();
+        sendClockOsc(date);
+    }, 100);
 }

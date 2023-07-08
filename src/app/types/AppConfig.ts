@@ -1,10 +1,17 @@
+export const NotificationTypes = {
+    Join: "join",
+    Leave: "leave",
+  } as const;
+  export type NotificationTypes =
+(typeof NotificationTypes)[keyof typeof NotificationTypes];
+
 /**
  * app が外部から受け取るパラメータ
  * cli prompt から受け取るため全て string
  */
  export interface AppParameterObject {
     interval?: string;
-    notificationTypes?: string[];
+    notificationTypes?: NotificationTypes[];
     specificNames?: string[];
     specificExec?: string;
     generalExec?: string;
@@ -13,6 +20,7 @@
     xsoverlayVolume?: string;
     xsoverlayOpacity?: string;
     xsoverlayTimeout?: string;
+    sendTime?: boolean;
     verbose?: boolean;
     noUpdate?: boolean;
     noCheckUpdate?: boolean;
@@ -24,7 +32,7 @@
  */
 export interface AppConfig {
     interval: string;
-    notificationTypes: string[];
+    notificationTypes: NotificationTypes[];
     specificNames: string[];
     specificExec?: string;
     generalExec?: string;
@@ -33,6 +41,7 @@ export interface AppConfig {
     xsoverlayVolume: string;
     xsoverlayOpacity: string;
     xsoverlayTimeout: string;
+    sendTime: boolean;
     verbose: boolean;
     noUpdate: boolean;
     noCheckUpdate: boolean;
