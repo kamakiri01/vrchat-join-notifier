@@ -201,9 +201,9 @@ function handlerLoop(context: AppContext): void | boolean {
 function getNotificationInfo(context: AppContext, latestLog: ActivityLog[]) {
     if (!context.userName) context.userName = findOwnUserName(latestLog);
 
-    const joinResult = (context.config.notificationTypes.indexOf("join") !== -1) ?
+    const joinResult = (context.config.notificationTypes.indexOf(NotificationTypes.Join) !== -1) ?
         checkNewJoin(latestLog, context.latestCheckIndex) : { userNames: [] };
-    const leaveResult = (context.config.notificationTypes.indexOf("leave") !== -1) ?
+    const leaveResult = (context.config.notificationTypes.indexOf(NotificationTypes.Leave) !== -1) ?
         checkNewLeave(latestLog, context.latestCheckIndex) : { userNames: [] };
     const isOwnExit = checkNewExit(latestLog, context.latestCheckIndex);
     const videoResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex);
