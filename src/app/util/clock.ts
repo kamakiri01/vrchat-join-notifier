@@ -1,7 +1,9 @@
 import { sendOsc } from "../osc/sender";
 
 export function sendClockOsc(date: Date) {
-    const decimalMoonPhase = getMoonPhaseFromDate(date) / 30;
+    const moonPhase = getMoonPhaseFromDate(date);
+    const decimalMoonPhase = Math.floor(moonPhase);
+    const floatMoonPhase = moonPhase / 30;
 
     const dateTimeSecond = date.getSeconds();
     const dateTimeMinute = date.getMinutes();
@@ -26,7 +28,8 @@ export function sendClockOsc(date: Date) {
     sendOsc(`/avatar/parameters/${"DateTimeHourFA"}`, {type: "Float", value: dateTimeHourFA });
     sendOsc(`/avatar/parameters/${"DateTimeMinuteFA"}`, {type: "Float", value: dateTimeMinuteFA });
     sendOsc(`/avatar/parameters/${"DateTimeSecondFA"}`, {type: "Float", value: dateTimeSecondFA });
-    sendOsc(`/avatar/parameters/${"Moonphase"}`, {type: "Float", value: decimalMoonPhase});
+    sendOsc(`/avatar/parameters/${"Moonphase"}`, {type: "Int", value: decimalMoonPhase});
+    sendOsc(`/avatar/parameters/${"MoonphaseF"}`, {type: "Float", value: floatMoonPhase});
 }
 
 function getMoonPhaseFromDate(date: Date): number {
