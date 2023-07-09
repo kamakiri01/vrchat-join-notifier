@@ -21,6 +21,7 @@ program
     .option("-xv, --xsoverlay-volume <volume>", "XSOverlay notification volume (0~1)")
     .option("-xo, --xsoverlay-opacity <opacity>", "XSOverlay notification opacity (0~1)")
     .option("-xt, --xsoverlay-timeout <sec>", "XSOverlay notification disappear time (sec)")
+    .option("-nst, --no-send-time", "prevent send OSC time parameter")
     .option("-V, --verbose", "display full log details")
     .option("--osc-sender-ip", "OSC destination host")
     .option("--osc-in-port", "OSC destination port")
@@ -47,16 +48,15 @@ export async function run(argv: any): Promise<void> {
         config.xsoverlayVolume =   program["xsoverlayVolume"];
         config.xsoverlayOpacity =  program["xsoverlayOpacity"];
         config.xsoverlayTimeout =  program["xsoverlayTimeout"];
+        config.sendTime =          program["sendTime"];
         config.verbose =           program["verbose"];
 
-        if (program["oscGeneralJoinAddress"] || program["oscSpecificJoinAddress"]) {
-            config.osc = {};
-            config.osc.senderIp =            program["oscSenderIp"];
-            config.osc.inPort =              program["oscInPort"];
-            config.osc.generalJoinAddress  = program["oscGeneralJoinAddress"];
-            config.osc.specificJoinAddress = program["oscSpecificJoinAddress"];
-            config.osc.timeoutSec =          program["oscTimeoutSec"];
-        }
+        config.osc = {};
+        config.osc.senderIp =            program["oscSenderIp"];
+        config.osc.inPort =              program["oscInPort"];
+        config.osc.generalJoinAddress  = program["oscGeneralJoinAddress"];
+        config.osc.specificJoinAddress = program["oscSpecificJoinAddress"];
+        config.osc.timeoutSec =          program["oscTimeoutSec"];
 
         // cli向けアップデート機能は提供していないため無効化する
         config.noUpdate =          true;

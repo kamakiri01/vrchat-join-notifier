@@ -1,3 +1,6 @@
+## 0.6.2
+- `--no-send-time` オプションを追加
+
 ## 0.6.1
 - specificJoinAddress を正しく処理できていなかった不具合を修正
 
