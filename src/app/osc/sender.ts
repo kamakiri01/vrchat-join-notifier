@@ -32,7 +32,7 @@ function parseOscConfig(config: OscConfig): ParsedOscConfig {
     }
 }
 
-export function sendJoinOsc(config: OscConfig): void {
+export function sendJoinOsc(config: OscConfig, isSpecific: boolean): void {
     const conf = parseOscConfig(config);
 
     // NOTE: Bundleを検討する余地がある。但し、VRChatのOSCがBundleを正常に処理するかは実装依存である
@@ -44,7 +44,7 @@ export function sendJoinOsc(config: OscConfig): void {
             notifingCountGeneral -= 1;
             if (notifingCountGeneral === 0) await sendOsc(conf.generalJoinAddress, {type: "boolean", value: false});
         });
-    if (conf.specificJoinAddress) sendOsc(conf.specificJoinAddress, {type: "boolean", value: true})
+    if (conf.specificJoinAddress && isSpecific) sendOsc(conf.specificJoinAddress, {type: "boolean", value: true})
         .then(async () => {
             notifingCountSpecific += 1;
             await sleep(conf.timeoutSec * 1000);
