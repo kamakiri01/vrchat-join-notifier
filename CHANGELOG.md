@@ -1,3 +1,6 @@
+## 0.6.3
+- 月齢アバターパラメータをInt値の `MoonPhase` とFloat値の `MoonPhaseF` に分離
+
 ## 0.6.2
 - `--no-send-time` オプションを追加
 
