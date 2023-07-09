@@ -129,7 +129,7 @@ function generateAppConfig(param: AppParameterObject): AppConfig {
         if (param[key] != null) config[key] = param[key];
     })
 
-    if (param.osc && (param.osc.generalJoinAddress || param.osc.specificJoinAddress || param.sendTime)) {
+    if (param.osc) {
         config.osc = JSON.parse(JSON.stringify(defaultOscConfig));
         (Object.keys(param.osc) as (keyof OscConfig)[]).forEach(key => {
             if (param.osc![key] != null) config.osc[key] = param.osc![key];
