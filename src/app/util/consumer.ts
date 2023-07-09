@@ -8,20 +8,18 @@ import { getVideoTitle, normalizeUrl } from "./videoUtil";
 
 export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
     if (userNames.length === 0) return;
+    const isSpecific = isIncludeSpecificNames(userNames, context.config.specificNames);
 
     if (context.config.generalExec) exec(context.config.generalExec, userNames);
+    if (context.config.specificExec && isSpecific) exec(context.config.specificExec, userNames);
 
-    const isSpecific = isIncludeSpecificNames(userNames, context.config.specificNames);
-    if (isSpecific && context.config.specificExec) {
-        exec(context.config.specificExec, userNames);
-    }
-    showNotification("join", userNames, isSpecific, context.config);
-    if (context.config.osc) sendJoinOsc(context.config.osc);
+    showNotification(context.config, "join", userNames, isSpecific);
+    if (context.config.osc) sendJoinOsc(context.config.osc, isSpecific);
 }
 
 export function consumeNewLeave(context: AppContext, userNames: string[]): void {
     if (userNames.length == 0) return;
-    showNotification("leave", userNames, false, context.config);
+    showNotification(context.config, "leave", userNames, false);
 }
 
 export function consumeVideo(context: AppContext, urls: string[]): void {
