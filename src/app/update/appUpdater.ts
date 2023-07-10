@@ -60,6 +60,11 @@ export async function replaceApp(tmpDirPath: string): Promise<boolean> {
             path.join(downloadDirPath, "latest.zip"),
             extractDirPath
         );
+        // NOTE: extractZip が end した後であっても、即時ファイルをコピーすると不完全なバイナリファイルが手に入ることがある。
+        // 暫定対策として1秒待つ。秒数に根拠はない
+        await (() => {
+            return new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
+        })();
 
         const extractFiles = fs.readdirSync(extractDirPath);
         const currentAppDir = path.join(__dirname, "../../../"); // ./lib/app/util/appUpdater.js から ./ への相対パス
@@ -77,6 +82,7 @@ export async function replaceApp(tmpDirPath: string): Promise<boolean> {
                     // NOTE: fs.copyFileSyncの場合、full copy完了前に関数が終了することがあるためcallbackを使う
                     fs.copyFile(newFileSourcePath, newFileDestPath, (err) => {
                         if (err) reject(err);
+                        // setTimeout(() => resolve(), 1000);
                         resolve();
                     });
                 })
