@@ -17,7 +17,7 @@ export async function canUpdate(): Promise<boolean> {
             },
             timeout: 3000
         };
-        const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.json", fetchOptions);
+        const response = await fetch("https://vrchatjoinnotifier.yie.jp/v2/notifier/latest.json", fetchOptions);
         if (!response.ok) return false;
         const latestJson: LatestJson = await response.json();
         return currentVersion < latestJson.version;
@@ -31,7 +31,7 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
     try {
         const downloadDirPath = path.join(tmpDirPath, "download");
         fs.mkdirSync(downloadDirPath, { recursive: true });
-        const response = await fetch("https://vrchatjoinnotifier.yie.jp/v1/notifier/latest.zip");
+        const response = await fetch("https://vrchatjoinnotifier.yie.jp/v2/notifier/latest.zip");
         if (!response || !response.ok) return false;
 
         const savePath = path.join(downloadDirPath, "latest.zip");
