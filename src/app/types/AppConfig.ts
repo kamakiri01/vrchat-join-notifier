@@ -25,6 +25,7 @@ export const NotificationTypes = {
     noUpdate?: boolean;
     noCheckUpdate?: boolean;
     osc?: Partial<OscConfig>;
+    logDirPath?: string;
 }
 
 /**
@@ -46,6 +47,7 @@ export interface AppConfig {
     noUpdate: boolean;
     noCheckUpdate: boolean;
     osc?: OscConfig;
+    logDirPath: string;
 }
 
 /**

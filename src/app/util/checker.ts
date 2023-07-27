@@ -1,4 +1,4 @@
-import { ActivityLog, ActivityType, AuthenticationActivityLog, MoveActivityLog, SDK2PlayerStartedActivityLog, USharpVideoStartedActivityLog, VideoPlayActivityLog } from "vrchat-activity-viewer";
+import { ActivityLog, ActivityType, AuthenticationActivityLog, EnterActivityLog, MoveActivityLog, SDK2PlayerStartedActivityLog, USharpVideoStartedActivityLog, VideoPlayActivityLog } from "vrchat-activity-viewer";
 
 export function findOwnUserName(latestLog: ActivityLog[]): string | null {
     const userName =
@@ -50,6 +50,19 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
         }
     }
     return { urls: [] };
+}
+
+export function checkNewEnter(latestLog: ActivityLog[], latestCheckIndex: number) {
+    const newEnterLog = latestLog
+        .filter((_, index) => (index > latestCheckIndex)) // latestCheckIndex の基準を揃えるため、 index を使う filter は最初に行う
+        .filter(e => e.activityType === ActivityType.Enter);
+
+    if (newEnterLog.length > 0) {
+        return {
+            worldNames: Array.from(new Set(newEnterLog.map(e => (<EnterActivityLog>e).worldData.worldName)))
+        }
+    }
+    return { worldNames: [] };
 }
 
 function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | SDK2PlayerStartedActivityLog {

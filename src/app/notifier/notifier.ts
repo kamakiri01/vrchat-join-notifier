@@ -5,9 +5,8 @@ import { generateFormulatedTime } from "../util/util";
 import { showToast, ToastAudioType } from "./toast";
 import { showXSOverlayNotification } from "./xsoverlayNotification";
 
-export function showNotification(config: AppConfig, label: string, userNames: string[], isSpecific: boolean): void {
+export function showNotification(config: AppConfig, time:string, label: string, userNames: string[], isSpecific: boolean): void {
     const message = userNames.join(", ");
-    const time = generateFormulatedTime(Date.now());
     logger.notifier.log(`${time} ${label}: ${userNames}`);
 
     if (config.isToast)
