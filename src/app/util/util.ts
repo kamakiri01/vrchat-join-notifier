@@ -65,7 +65,7 @@ async function deleteClosedTmpDirs(appTmpDirPath: string): Promise<void> {
             // ロックファイルが無い、あるがパース出来ない、pidを読みだせない場合は異常系としてフォルダ削除を試みる
         }
         try {
-            fs.rmdirSync(targetAppTmpDirPath, { recursive: true });
+            fs.rmSync(targetAppTmpDirPath, { recursive: true });
         } catch (error) {
             // 次回以降の起動時に消えることを期待してこのプロセスでは削除せずエラーも握りつぶす
         }
