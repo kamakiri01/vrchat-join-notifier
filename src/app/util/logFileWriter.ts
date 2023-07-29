@@ -48,6 +48,7 @@ class LogFileWriter {
     }
 
     private _writeDateLine() {
+        if (!this.isWritable) return;
         const time = generateFormulatedTime(Date.now());
         this.activityLogStream.write(`\n${time}\n`);
         this.videoLogStream.write(`\n${time}\n`);

@@ -30,7 +30,7 @@ const defaultAppConfig: AppConfig = {
     verbose: false,
     noUpdate: false,
     noCheckUpdate: false,
-    logDirPath: path.join(process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"]!, ".vrchatJoinNotifier")
+    logDirPath: ".\\log"
 }
 
 const defaultOscConfig: OscConfig = {
