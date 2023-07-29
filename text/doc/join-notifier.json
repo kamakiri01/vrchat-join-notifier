@@ -134,5 +134,15 @@
          * Specifies the time between sending true and sending false. [sec]
          */
          "timeoutSec": "3"
-    }
+    },
+
+    /**
+     * ログファイルの保存先を指定します。 ".\\" はアプリケーションのあるディレクトリを指します。
+     * "C:\\Users\\yourname\\.vrchatJoinNotifier" のようにフルパスで保存先を指定することもできます。
+     * 省略された場合、 ".\\log"
+     * Specify where to save the log file. ". \\" points to the directory where this application path.
+     * You can also specify the destination by full path like "C:\Users\\yourname\\\.vrchatJoinNotifier".
+     * If omitted, it will be ".\\log"
+     */
+    "logDirPath": ".\\log"
 }

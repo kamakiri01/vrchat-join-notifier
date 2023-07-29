@@ -2,8 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, NotificationTypes, OscConfig } from "./types/AppConfig";
-import { checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
-import { comsumeNewJoin, consumeNewLeave, consumeVideo } from "./util/consumer";
+import { checkNewEnter, checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
+import { comsumeNewJoin, consumeEnter, consumeNewLeave, consumeVideo } from "./util/consumer";
 import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
 import { getTmpDir, initTmpDir } from "./util/util";
 import * as appUpdater from "./update/appUpdater";
@@ -13,6 +13,7 @@ import { logger } from "./util/logger";
 import { initytDlpExe } from "./util/videoUtil";
 import { sendClockOsc } from "./util/clock";
 import { createClient } from "./osc/sender";
+import { initLogFileWriter } from "./util/logFileWriter";
 
 const defaultAppConfig: AppConfig = {
     interval: "2",
@@ -28,14 +29,15 @@ const defaultAppConfig: AppConfig = {
     sendTime: true,
     verbose: false,
     noUpdate: false,
-    noCheckUpdate: false
+    noCheckUpdate: false,
+    logDirPath: ".\\log"
 }
 
 const defaultOscConfig: OscConfig = {
     senderIp: "127.0.0.1",
     inPort: "9000",
     timeoutSec: "3",
-    generalJoinAddress: undefined!
+    generalJoinAddress: "/avatar/parameters/JoinNotifyItem"
 };
 
 export interface AppContext {
@@ -67,6 +69,7 @@ function _app(param: AppParameterObject) {
     const interval = parseInt(config.interval, 10);
     const manager = new ContextManager({ config });
 
+    initLogFileWriter(config.logDirPath);
     if (config.osc) {
         createClient(config.osc.senderIp, parseInt(config.osc.inPort));
         if (config.sendTime) setOSCClockSender();
@@ -183,6 +186,7 @@ function handlerLoop(context: AppContext): void | boolean {
             if (!isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames))
                 consumeNewLeave(context, notificationInfo.leave.userNames);
             consumeVideo(context, notificationInfo.video.urls);
+            consumeEnter(context, notificationInfo.enter.worldNames);
         })();
 
         const isSuspended = isSuspendedLog(context.logFilePath);
@@ -207,12 +211,14 @@ function getNotificationInfo(context: AppContext, latestLog: ActivityLog[]) {
         checkNewLeave(latestLog, context.latestCheckIndex) : { userNames: [] };
     const isOwnExit = checkNewExit(latestLog, context.latestCheckIndex);
     const videoResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex);
+    const EnterResult = checkNewEnter(latestLog, context.latestCheckIndex);
 
     return {
         isOwnExit,
         join: joinResult,
         leave: leaveResult,
-        video: videoResult
+        video: videoResult,
+        enter: EnterResult
     };
 }
 

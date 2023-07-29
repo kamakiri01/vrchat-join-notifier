@@ -5,6 +5,7 @@ import { sendJoinOsc } from "../osc/sender";
 import { logger } from "./logger";
 import { generateFormulatedTime } from "./util";
 import { getVideoTitle, normalizeUrl } from "./videoUtil";
+import { logFileWriter } from "./logFileWriter";
 
 export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
     if (userNames.length === 0) return;
@@ -13,13 +14,17 @@ export function comsumeNewJoin(context: AppContext, userNames: string[]): void {
     if (context.config.generalExec) exec(context.config.generalExec, userNames);
     if (context.config.specificExec && isSpecific) exec(context.config.specificExec, userNames);
 
-    showNotification(context.config, "join", userNames, isSpecific);
+    const time = generateFormulatedTime(Date.now());
+    showNotification(context.config, time, "join", userNames, isSpecific);
+    logFileWriter.writeActivityLog(`${time} join ${userNames}`);
     if (context.config.osc) sendJoinOsc(context.config.osc, isSpecific);
 }
 
 export function consumeNewLeave(context: AppContext, userNames: string[]): void {
     if (userNames.length == 0) return;
-    showNotification(context.config, "leave", userNames, false);
+    const time = generateFormulatedTime(Date.now());
+    logFileWriter.writeActivityLog(`${time} leave ${userNames}`);
+    showNotification(context.config, time, "leave", userNames, false);
 }
 
 export function consumeVideo(context: AppContext, urls: string[]): void {
@@ -33,8 +38,16 @@ export function consumeVideo(context: AppContext, urls: string[]): void {
         } catch (e) {
             // do nothing
         }
-        logger.videoLog.log(`${time} ${normalizedUrl} ${title}`);
+        const message = `${time} ${normalizedUrl} ${title}`;
+        logger.videoLog.log(message);
+        logFileWriter.writeVideoLog(message);
     });
+}
+
+export function consumeEnter(context: AppContext, worldNames: string[]): void {
+    if (worldNames.length === 0) return;
+    const time = generateFormulatedTime(Date.now());
+    logFileWriter.writeActivityLog(`${time} enter ${worldNames}`);
 }
 
 function isIncludeSpecificNames(names: string[], specificNames: string[]): boolean {
