@@ -44,9 +44,12 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
     const newVideoLog = latestLog
         .filter((_, index) => (index > latestCheckIndex))
         .filter(isVideoType);
+    const latestVideoURLInChecked = /* latestLog.filter((_, index) => (index < latestCheckIndex)).filter(isVideoType).reverse()[0]?.url ??  **/ "";
+
     if (newVideoLog.length > 0) {
         return {
-            urls: Array.from(new Set(newVideoLog.map(e => e.url))) // 同じvideoログを複数出力するワールドがあるため重複をなくす
+            urls: Array.from(new Set(newVideoLog.map(e => e.url).filter(url => url !== latestVideoURLInChecked))) // 同じvideoログを複数出力するワールドがあるため重複をなくす
+
         }
     }
     return { urls: [] };

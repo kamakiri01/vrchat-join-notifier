@@ -35,12 +35,15 @@ export function consumeVideo(context: AppContext, urls: string[]): void {
         const normalizedUrl = normalizeUrl(url);
         try {
             title = getVideoTitle(normalizedUrl, context.config.verbose);
+            // NOTE: 現実装はtitleを取得できないVideoは通知に出さない。
+            // タイトルが存在しないVideoを通知できないことになるが、404のVideoが高頻度で通知されることがあるため、こちらに倒す。
+            // 事前にfetchするなどの対応を検討する。
+            const message = `${time} ${normalizedUrl} ${title}`;
+            logger.videoLog.log(message);
+            logFileWriter.writeVideoLog(message);
         } catch (e) {
-            // do nothing
+            if (context.config.verbose) console.log("consumeVideo Error", e);
         }
-        const message = `${time} ${normalizedUrl} ${title}`;
-        logger.videoLog.log(message);
-        logFileWriter.writeVideoLog(message);
     });
 }
 
