@@ -27,24 +27,26 @@ export function consumeNewLeave(context: AppContext, userNames: string[]): void 
     showNotification(context.config, time, "leave", userNames, false);
 }
 
-export function consumeVideo(context: AppContext, urls: string[]): void {
+export function consumeVideo(context: AppContext, urls: string[], isCheckTitle: boolean): void {
     if (urls.length == 0) return;
     const time = generateFormulatedTime(Date.now());
     urls.forEach(url => {
         let title = "";
         const normalizedUrl = normalizeUrl(url);
         try {
-            title = getVideoTitle(normalizedUrl, context.config.verbose);
+            // NOTE: タイトルを取得できなかったVideoは通知に出ない。
+            // 取得の可否はyt-dlpの挙動に依存する。
+            title = isCheckTitle ? getVideoTitle(normalizedUrl, context.config.verbose) : "";
+            const message = `${time} ${normalizedUrl} ${title}`;
+            logger.videoLog.log(message);
+            logFileWriter.writeVideoLog(message);
         } catch (e) {
-            // do nothing
+            if (context.config.verbose) console.log("consumeVideo Error", e);
         }
-        const message = `${time} ${normalizedUrl} ${title}`;
-        logger.videoLog.log(message);
-        logFileWriter.writeVideoLog(message);
     });
 }
 
-export function consumeEnter(context: AppContext, worldNames: string[]): void {
+export function consumeEnter(_: AppContext, worldNames: string[]): void {
     if (worldNames.length === 0) return;
     const time = generateFormulatedTime(Date.now());
     logFileWriter.writeActivityLog(`${time} enter ${worldNames}`);

@@ -11,6 +11,11 @@ export function getVideoTitle(url: string, verbose: boolean): string {
     // Falling back on generic information extractor.
     // URL could be a direct video link, returning it as such.
     const cliOption = " --skip-download --print title" + (verbose ? "" : " --no-warnings");
+    try {
+        execSync(`${ytDlpExePath} ${cliOption} ${url}`, {stdio: "ignore"}); // yt-dlpのエラー時出力は標準に流れるのでまずignoreでエラー存在確認する
+    } catch (error) {
+        throw error;
+    }
     const buf = execSync(`${ytDlpExePath} ${cliOption} ${url}`);
     return iconv.decode(buf, "Shift_JIS").replace(/\r?\n/g,"");
 }
