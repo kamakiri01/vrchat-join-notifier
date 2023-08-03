@@ -27,17 +27,16 @@ export function consumeNewLeave(context: AppContext, userNames: string[]): void 
     showNotification(context.config, time, "leave", userNames, false);
 }
 
-export function consumeVideo(context: AppContext, urls: string[]): void {
+export function consumeVideo(context: AppContext, urls: string[], isCheckTitle: boolean): void {
     if (urls.length == 0) return;
     const time = generateFormulatedTime(Date.now());
     urls.forEach(url => {
         let title = "";
         const normalizedUrl = normalizeUrl(url);
         try {
-            title = getVideoTitle(normalizedUrl, context.config.verbose);
-            // NOTE: 現実装はtitleを取得できないVideoは通知に出さない。
-            // タイトルが存在しないVideoを通知できないことになるが、404のVideoが高頻度で通知されることがあるため、こちらに倒す。
-            // 事前にfetchするなどの対応を検討する。
+            // NOTE: タイトルを取得できなかったVideoは通知に出ない。
+            // 取得の可否はyt-dlpの挙動に依存する。
+            title = isCheckTitle ? getVideoTitle(normalizedUrl, context.config.verbose) : "";
             const message = `${time} ${normalizedUrl} ${title}`;
             logger.videoLog.log(message);
             logFileWriter.writeVideoLog(message);
@@ -47,7 +46,7 @@ export function consumeVideo(context: AppContext, urls: string[]): void {
     });
 }
 
-export function consumeEnter(context: AppContext, worldNames: string[]): void {
+export function consumeEnter(_: AppContext, worldNames: string[]): void {
     if (worldNames.length === 0) return;
     const time = generateFormulatedTime(Date.now());
     logFileWriter.writeActivityLog(`${time} enter ${worldNames}`);

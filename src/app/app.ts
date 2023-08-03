@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { findLatestVRChatLogFullPath, parseVRChatLog, ActivityLog } from "vrchat-activity-viewer";
 import { AppConfig, AppParameterObject, NotificationTypes, OscConfig } from "./types/AppConfig";
-import { checkNewEnter, checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName } from "./util/checker";
+import { checkNewEnter, checkNewExit, checkNewJoin, checkNewLeave, checkNewVideoPlayer, findOwnUserName, isTopazType, isVideoType } from "./util/checker";
 import { comsumeNewJoin, consumeEnter, consumeNewLeave, consumeVideo } from "./util/consumer";
 import { showInitNotification, showNewLogNotification, showSuspendLogNotification } from "./notifier/notifier";
 import { getTmpDir, initTmpDir } from "./util/util";
@@ -185,8 +185,9 @@ function handlerLoop(context: AppContext): void | boolean {
             comsumeNewJoin(context, notificationInfo.join.userNames);
             if (!isNoNeedToNotifiyLeave(notificationInfo.isOwnExit, context.userName, notificationInfo.leave.userNames))
                 consumeNewLeave(context, notificationInfo.leave.userNames);
-            consumeVideo(context, notificationInfo.video.urls);
-            consumeEnter(context, notificationInfo.enter.worldNames);
+                consumeVideo(context, notificationInfo.video.urls, true);
+                consumeVideo(context, notificationInfo.topaz.urls, false);
+                consumeEnter(context, notificationInfo.enter.worldNames);
         })();
 
         const isSuspended = isSuspendedLog(context.logFilePath);
@@ -210,7 +211,8 @@ function getNotificationInfo(context: AppContext, latestLog: ActivityLog[]) {
     const leaveResult = (context.config.notificationTypes.indexOf(NotificationTypes.Leave) !== -1) ?
         checkNewLeave(latestLog, context.latestCheckIndex) : { userNames: [] };
     const isOwnExit = checkNewExit(latestLog, context.latestCheckIndex);
-    const videoResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex);
+    const videoResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex, isVideoType);
+    const topazResult = checkNewVideoPlayer(latestLog, context.latestCheckIndex, isTopazType);
     const EnterResult = checkNewEnter(latestLog, context.latestCheckIndex);
 
     return {
@@ -218,6 +220,7 @@ function getNotificationInfo(context: AppContext, latestLog: ActivityLog[]) {
         join: joinResult,
         leave: leaveResult,
         video: videoResult,
+        topaz: topazResult,
         enter: EnterResult
     };
 }

@@ -1,4 +1,4 @@
-import { ActivityLog, ActivityType, AuthenticationActivityLog, EnterActivityLog, MoveActivityLog, SDK2PlayerStartedActivityLog, USharpVideoStartedActivityLog, VideoPlayActivityLog } from "vrchat-activity-viewer";
+import { ActivityLog, ActivityType, AuthenticationActivityLog, EnterActivityLog, MoveActivityLog, SDK2PlayerStartedActivityLog, TopazPlayActivityLog, VideoPlayActivityLog } from "vrchat-activity-viewer";
 
 export function findOwnUserName(latestLog: ActivityLog[]): string | null {
     const userName =
@@ -40,10 +40,11 @@ export function checkNewExit(latestLog: ActivityLog[], latestCheckIndex: number)
     return newExitLog.length > 0;
 }
 
-export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: number) {
+export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: number, filter: typeof isVideoType | typeof isTopazType) {
     const newVideoLog = latestLog
         .filter((_, index) => (index > latestCheckIndex))
-        .filter(isVideoType);
+        .filter<VideoPlayActivityLog | SDK2PlayerStartedActivityLog | TopazPlayActivityLog>(filter);
+
         // NOTE: 同じvideoログを複数出力するワールドがあるため重複をなくす。
         // ただしこの方法では正常な範囲での重複ケースと場合分けできないので方法を検討する
     const latestVideoURLInChecked = /* latestLog.filter((_, index) => (index < latestCheckIndex)).filter(isVideoType).reverse()[0]?.url ??  **/ "";
@@ -51,7 +52,6 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
     if (newVideoLog.length > 0) {
         return {
             urls: Array.from(new Set(newVideoLog.map(e => e.url).filter(url => url !== latestVideoURLInChecked)))
-
         }
     }
     return { urls: [] };
@@ -70,9 +70,14 @@ export function checkNewEnter(latestLog: ActivityLog[], latestCheckIndex: number
     return { worldNames: [] };
 }
 
-function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | SDK2PlayerStartedActivityLog {
+export function isVideoType(log: ActivityLog): log is VideoPlayActivityLog | SDK2PlayerStartedActivityLog {
     const videoTypes: ActivityType[] = [ActivityType.VideoPlay, ActivityType.SDK2PlayerStarted];
     return videoTypes.includes(log.activityType);
+}
+
+export function isTopazType(log: ActivityLog): log is TopazPlayActivityLog {
+    const topazTypes: ActivityType[] = [ActivityType.TopazPlay];
+    return topazTypes.includes(log.activityType);
 }
 
 interface CheckMoveResult {
