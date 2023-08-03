@@ -45,8 +45,8 @@ export function checkNewVideoPlayer(latestLog: ActivityLog[], latestCheckIndex: 
         .filter((_, index) => (index > latestCheckIndex))
         .filter<VideoPlayActivityLog | SDK2PlayerStartedActivityLog | TopazPlayActivityLog>(filter);
 
-        // NOTE: 同じvideoログを複数出力するワールドがあるため重複をなくす。
-        // ただしこの方法では正常な範囲での重複ケースと場合分けできないので方法を検討する
+    // NOTE: 同じvideoログを複数出力するワールドがあるため重複をなくす。
+    // ただしこの方法では正常な範囲での重複ケースと場合分けできないので方法を検討する
     const latestVideoURLInChecked = /* latestLog.filter((_, index) => (index < latestCheckIndex)).filter(isVideoType).reverse()[0]?.url ??  **/ "";
 
     if (newVideoLog.length > 0) {
