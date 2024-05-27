@@ -1,4 +1,4 @@
-import fetch, { RequestInit } from "node-fetch";
+import { Readable } from "stream";
 import * as path from "path";
 import * as fs from "fs";
 import * as unzipper from "unzipper";
@@ -10,16 +10,14 @@ export async function canUpdate(): Promise<boolean> {
         /* eslint-disable @typescript-eslint/no-var-requires */
         const latest = require("../latestJson/latestJson").latestJson as LatestJson;
         const currentVersion = latest.version;
-
-        const fetchOptions: RequestInit = {
+        const response = await fetch("https://vrchatjoinnotifier.yie.jp/v2/notifier/latest.json", {
             headers: {
                 "User-Agent": "VRChatJoinNotifier-Updater:v" + currentVersion
             },
-            timeout: 3000
-        };
-        const response = await fetch("https://vrchatjoinnotifier.yie.jp/v2/notifier/latest.json", fetchOptions);
+            signal: AbortSignal.timeout(3000)
+        });
         if (!response.ok) return false;
-        const latestJson: LatestJson = await response.json();
+        const latestJson: LatestJson = await response.json() as LatestJson;
         return currentVersion < latestJson.version;
     } catch (error: any) {
         handleProtocolError(error);
@@ -32,14 +30,15 @@ export async function downloadLatest(tmpDirPath: string): Promise<boolean> {
         const downloadDirPath = path.join(tmpDirPath, "download");
         fs.mkdirSync(downloadDirPath, { recursive: true });
         const response = await fetch("https://vrchatjoinnotifier.yie.jp/v2/notifier/latest.zip");
-        if (!response || !response.ok) return false;
+        if (!response || !response.body || !response.ok) return false;
 
         const savePath = path.join(downloadDirPath, "latest.zip");
         const writeStream = fs.createWriteStream(savePath);
 
         await new Promise<boolean>((resolve, reject) => {
-            response.body.pipe(writeStream);
-            response.body.on("error", (err) => reject(err));
+            const readableBody = Readable.fromWeb(response.body!);
+            readableBody.pipe(writeStream);
+            readableBody.on("error", (err) => reject(err));
             writeStream.on("finish", () => resolve(true));
         });
 

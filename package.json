@@ -1,9 +1,9 @@
 {
   "name": "vrchat-join-notifier",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Notify when someone joins the same instance",
   "engines": {
-    "node": ">=12.x"
+    "node": ">=20.x"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && npm run concat:latest && npm run concat:package-json",
@@ -37,15 +37,13 @@
     "find-process": "^1.4.7",
     "iconv-lite": "^0.6.3",
     "jsonc-parser": "^3.0.0",
-    "node-fetch": "^2.6.6",
     "osc-min": "^1.1.2",
     "powertoast": "^1.2.3",
     "unzipper": "^0.10.11",
     "vrchat-activity-viewer": "^6.2.1"
   },
   "devDependencies": {
-    "@types/node": "^14.14.43",
-    "@types/node-fetch": "^2.5.12",
+    "@types/node": "^20.12.12",
     "@types/unzipper": "^0.10.5",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
