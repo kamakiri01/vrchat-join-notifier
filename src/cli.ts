@@ -28,6 +28,7 @@ program
     .option("--osc-general-join-address <address>", "OSC destination address. (NOTE: msys/MinGW auto convert look like Unix paths[/foo/bar] to Windows[C:\\...]. use MSYS2_ARG_CONV_EXCL or some else)")
     .option("--osc-specific-join-address <address>.", "OSC destination address for specific names")
     .option("--osc-timeout-sec", "time to reset sent OSC parameter")
+    .option("--force-launcher-config", "specify launcher config")
     // .option("-nu, --no-update", "no update")
     // .option("-nc, --no-check-update", "no check update")
 

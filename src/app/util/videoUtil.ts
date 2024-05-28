@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import { URL } from "url";
 import * as iconv from "iconv-lite";
 import { getTmpDir } from "./util";
+import * as sea from "node:sea";
 
 export function getVideoTitle(url: string, verbose: boolean): string {
     if (!ytDlpExePath) throw Error();
@@ -53,7 +54,13 @@ export function initytDlpExe() {
         // NOTE: nexe環境ではfsモジュールが仮想化されているため、yt-dlp.exeファイルはzipに同梱せず、nexe compileのresourcesに含めたうえで、
         // 一時ディレクトリに展開する必要がある。
         // また、resourcesに含めたファイルはfs.exists()とreadFileSync()で確認と読み出しができるが、fs.access()でアクセスすることはできない。
-        const exeFile = fs.readFileSync(YT_DLP_EXE_VIRTUAL_PATH);
+        // const exeFile = fs.readFileSync(YT_DLP_EXE_VIRTUAL_PATH);
+        let exeFile: Buffer;
+        if (sea.isSea()) {
+            exeFile = Buffer.from(sea.getAsset("yt-dlp.exe"));
+        } else {
+            exeFile = fs.readFileSync(YT_DLP_EXE_VIRTUAL_PATH);
+        }
         fs.writeFileSync(path.join(tmpDirPath, YT_DLP_EXE_FILENAME), exeFile);
         ytDlpExePath = `${path.join(tmpDirPath, YT_DLP_EXE_FILENAME)}`;
     } catch (e) {

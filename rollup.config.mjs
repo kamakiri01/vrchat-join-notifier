@@ -17,9 +17,6 @@ export default (async () => ({
 	output: {
 		file: 'tmp/bundle.js',
 		format: 'cjs',
-		globals: {
-			twoToThe32: 0
-		}
 	},
 	bundleConfigAsCjs: true,
 
