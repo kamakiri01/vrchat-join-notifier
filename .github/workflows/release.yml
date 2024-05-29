@@ -8,6 +8,9 @@ on:
         required: true
         default: ""
 
+env:
+  NODE_VERSION: '20.12'
+
 jobs:
   release:
     runs-on: windows-latest
