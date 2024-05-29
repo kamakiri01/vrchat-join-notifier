@@ -1,0 +1,10 @@
+{
+    "main": "./tmp/bundle.js",
+    "output": "./tmp/blob.blob",
+    "disableExperimentalSEAWarning": true,
+    "useSnapshot": false,
+    "useCodeCache": true,
+    "assets": {
+      "yt-dlp.exe": "./thirdparty/yt-dlp/yt-dlp.exe"
+    }
+}
