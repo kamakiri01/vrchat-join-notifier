@@ -35,7 +35,7 @@ jobs:
         run: npm run build
       - name: Create zip
         run: |
-          npm run deploy:win-standalone
+          npm run deploy
           ren vrchat-join-notifier.zip vrchat-join-notifier-v${{ github.event.inputs.version }}-win10-x64.zip
       - name: Create a GitHub release
         id: create_release
