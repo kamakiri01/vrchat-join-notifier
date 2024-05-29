@@ -1,3 +1,6 @@
+## 0.7.3
+- 実行ファイルのビルドをnexeからsingle executable applicationsを利用するように変更
+
 ## 0.7.2
 - Node.js v20系に更新
 

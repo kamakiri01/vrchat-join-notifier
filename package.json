@@ -1,12 +1,12 @@
 {
   "name": "vrchat-join-notifier",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Notify when someone joins the same instance",
   "engines": {
     "node": ">=20.12.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && npm run concat:latest && npm run concat:package-json",
+    "build": "tsc -p tsconfig.json && mkdirp lib/app/latestJson && run-s concat:latest concat:package-json",
     "concat:latest": "concat scripts/conf/platforms/node/prefix.js text/app/latest.json scripts/conf/platforms/node/suffix.js -o lib/app/latestJson/latestJson.js",
     "concat:package-json": "node scripts/build/exportPackageJsonReduced.js",
     "lint": "eslint \"./src/**/*.ts\"",
@@ -16,13 +16,15 @@
     "deploy:exe:blob": "node --experimental-sea-config sea-config.json",
     "deploy:exe:copy": "node -e \"require('fs').copyFileSync(process.execPath, './tmp/vrchat-join-notifier.exe')\"",
     "deploy:exe:postject": "postject ./tmp/vrchat-join-notifier.exe NODE_SEA_BLOB ./tmp/blob.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
-    "deploy:win-standalone": "cpx tmp/vrchat-join-notifier.exe ./vrchat-join-notifier/ && npm run deploy:win-standalone:text && npm run deploy:win-standalone:zip",
+    "deploy:win-standalone": "run-s deploy:win-standalone:text deploy:win-standalone:copy deploy:win-standalone:zip",
+    "deploy:win-standalone:copy": "cpx tmp/vrchat-join-notifier.exe ./vrchat-join-notifier/",
     "deploy:win-standalone:text": "cpx --clean ./text/doc/** ./vrchat-join-notifier/",
     "deploy:win-standalone:zip": "powershell compress-archive vrchat-join-notifier/ vrchat-join-notifier.zip -Force",
-    "deploy:win-for-launcher": "cpx tmp/vrchat-join-notifier.exe ./vrchat-join-notifier-for-launcher/ && npm run deploy:win-for-launcher:text",
+    "deploy:win-for-launcher": "run-s  deploy:win-for-launcher:text",
+    "deploy:win-for-launcher:copy": "cpx tmp/vrchat-join-notifier.exe ./vrchat-join-notifier-for-launcher/",
     "deploy:win-for-launcher:text": "cpx --clean ./text/doc/**/*.json ./vrchat-join-notifier-for-launcher/",
     "release": "npm run release:web-update",
-    "release:web-update": "npm run release:web-update:json && npm run release:web-update:zip",
+    "release:web-update": "run-s release:web-update:json release:web-update:zip",
     "release:web-update:json": "cpx text/app/latest.json public/",
     "release:web-update:zip": "powershell compress-archive vrchat-join-notifier/vrchat-join-notifier.exe public/latest.zip -Force",
     "update:yt-dlp": "node scripts/update/updateYtDlp.js"
@@ -58,10 +60,9 @@
     "cpx": "^1.5.0",
     "eslint": "^7.25.0",
     "mkdirp": "^1.0.4",
-    "nexe": "^3.3.7",
     "npm-run-all": "^4.1.5",
     "postject": "^1.0.0-alpha.6",
     "rollup": "^4.18.0",
-    "typescript": "^4.2.3"
+    "typescript": "^5.4.5"
   }
 }
