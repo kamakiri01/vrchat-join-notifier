@@ -2,7 +2,6 @@ import * as path from "path";
 import { app } from "./app/app";
 import { logger } from "./app/util/logger";
 import { readConfigFile } from "./app/util/util";
-import * as fs from "fs";
 
 // NOTE: packageJsonReducedのversionはランチャーのビルドプロセス中にランチャーバージョンで上書きされる
 /* eslint-disable @typescript-eslint/no-var-requires */
