@@ -10,11 +10,8 @@ const packageJson = require("./app/packageJsonReduced/packageJsonReduced").packa
 logger.notifier.log("notifier running.");
 logger.notifier.log(`version: ${packageJson.version}`);
 
-console.log("test1", fs.readdirSync(path.resolve(__dirname, "..")));
-console.log("test2", fs.readdirSync(path.resolve(__dirname)));
-const config = readConfigFile(path.resolve(__dirname, "..", "join-notifier.json")); // /src/winExeStandalne.js を
-config.osc = {};
-console.log("config", config);
+// nexeの場合、/src/winExeStandalne.js からの相対パスとして..を経由する。seaの場合、bundleされるためsrcパスの階層は消える
+const config = readConfigFile(path.resolve(__dirname, ".", "join-notifier.json"));
 if (process.argv.includes("--no-update")) config.noUpdate = true;
 if (process.argv.includes("--no-check-update")) config.noUpdate = true;
 if (process.argv.includes("--force-launcher-config")) {
