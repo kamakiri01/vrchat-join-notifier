@@ -10,7 +10,8 @@ export default (async () => ({
 		commonjs(),
 		json(),
 		replace({
-			"twoToThe32 =": "var twoToThe32=", // 置き換え後を再マッチしないよう空白を入れない
+			"twoToThe32 =": "var twoToThe32=", // 置換後を再マッチしないよう、置換後は空白を入れない
+			"    b = new Buffer": "var b = new Buffer", // 置換対象をvar宣言のないものに限るため、置換元に空白を含める
 			delimiters: ['', ''] // 空白を挟む箇所を置き換えるため、単語で区切らせない
 		}),
 	],
