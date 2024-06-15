@@ -1,7 +1,11 @@
 import * as path from "path";
+import * as process from "process";
 import { app } from "./app/app";
 import { logger } from "./app/util/logger";
 import { readConfigFile } from "./app/util/util";
+
+// bundleにBuffer記法が含まれるためDeprecationWarningが出る。引数などでexeのloglevelを変えるべきだが、暫定対応としてリスナーを切る
+process.removeAllListeners('warning');
 
 // NOTE: packageJsonReducedのversionはランチャーのビルドプロセス中にランチャーバージョンで上書きされる
 /* eslint-disable @typescript-eslint/no-var-requires */
