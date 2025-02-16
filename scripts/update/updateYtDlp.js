@@ -2,7 +2,6 @@
  * @reference https://github.com/microlinkhq/youtube-dl-exec/blob/6ed35fa2f7fe057b79c13115110537c331de0bc2/scripts/postinstall.js
  */
 
-const { default: fetch } = require("node-fetch");
 const path = require("path");
 const fs = require("fs");
 
@@ -18,7 +17,9 @@ async function getBinary(url) {
         ({ name }) => name === "yt-dlp.exe"
     );
 
-    return fetch(downloadUrl).then(res => res.buffer());
+    const res = await fetch(downloadUrl);
+    const arrayBuffer = await res.arrayBuffer();
+    return Buffer.from(arrayBuffer);
 }
 
 getBinary(YT_DLP_HOST).then(buffer => {
