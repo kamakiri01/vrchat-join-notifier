@@ -1,6 +1,6 @@
 {
   "name": "vrchat-join-notifier",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "description": "Notify when someone joins the same instance",
   "engines": {
     "node": ">=20.12.0"
@@ -45,7 +45,7 @@
     "osc-min": "^1.1.2",
     "powertoast": "^1.2.3",
     "unzipper": "^0.10.11",
-    "vrchat-activity-viewer": "^6.2.1"
+    "vrchat-activity-viewer": "^7.4.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",
